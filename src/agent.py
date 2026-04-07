@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from collections import defaultdict
 from difflib import SequenceMatcher
 from typing import Any, Dict, List, Optional, Tuple, cast
@@ -139,8 +140,20 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 		return None, f"llm_call_failed: {e}"
 
 	content = ""
+	usage = {}
+
 	if response.choices and response.choices[0].message:
 		content = response.choices[0].message.content or ""
+	elif hasattr(response, "model_extra") and isinstance(response.model_extra, dict):
+		content = response.model_extra['content'][0]['text']
+
+	if hasattr(response, "usage") and hasattr(response.usage, "model_extra") and \
+		isinstance(response.usage.model_extra, dict):
+
+		usage = {
+			'input_tokens': response.usage.model_extra.get('input_tokens', 0),
+			'output_tokens': response.usage.model_extra.get('output_tokens', 0),
+		}
 	payload = _extract_json_payload(content)
 	if payload is None:
 		return None, "llm_invalid_json"
@@ -171,6 +184,7 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 			"response": response_text,
 			"confidence": max(0.0, min(confidence, 1.0)),
 			"flags": sorted(set(flags + ["llm_used"])),
+			"usage": usage,
 		},
 		None,
 	)
@@ -277,7 +291,7 @@ def _build_grounded_response(ticket: Dict[str, str], category: str, context_exam
 	)
 
 
-def classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict[str, object]:
+def _classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict[str, object]:
 	context_examples = retrieve_context(ticket, kb_index)
 	llm_result, llm_error_flag = _classify_with_llm(ticket, context_examples)
 	if llm_result is not None:
@@ -303,4 +317,18 @@ def classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict
 		"confidence": confidence,
 		"flags": [llm_error_flag] if llm_error_flag else [],
 		"context_ticket_ids": [example.get("ticket_id", "") for example in context_examples],
+		"usage": {
+			'input_tokens': 0,
+			'output_tokens': 0,
+		}
 	}
+
+
+def classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict[str, object]:
+	start_time = time.time()
+	result = _classify_ticket(ticket, kb_index)
+	end_time = time.time()
+	time_taken = end_time - start_time
+	usage = result.get("usage", {})
+	usage["time_taken"] = time_taken
+	return result
