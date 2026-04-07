@@ -41,12 +41,12 @@ PRIORITY_HINTS = {
 }
 
 DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
-DEFAULT_LLM_MODEL = "claude-sonnet-4-6-20260320"
+DEFAULT_LLM_MODEL = "claude-sonnet-4-6"
 
 
 def _get_llm_config() -> Dict[str, str]:
-	api_key = os.getenv("LSP_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
-	base_url = os.getenv("LSP_API_BASE") or os.getenv("OPENAI_BASE_URL") or DEFAULT_LLM_BASE_URL
+	api_key = os.getenv("LSP_API_KEY") or os.getenv("API_KEY") or ""
+	base_url = os.getenv("LSP_API_BASE") or os.getenv("BASE_URL") or DEFAULT_LLM_BASE_URL
 	model = os.getenv("LSP_MODEL") or os.getenv("OPENAI_MODEL") or DEFAULT_LLM_MODEL
 	return {
 		"api_key": api_key,
@@ -93,7 +93,7 @@ def _make_llm_messages(ticket: Dict[str, str], context_examples: List[Dict[str, 
 	)
 
 	return [
-		{"role": "system", "content": system_prompt},
+		{"role": "user", "content": system_prompt},
 		{"role": "user", "content": user_prompt},
 	]
 
@@ -135,8 +135,8 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 			messages=messages,
 			temperature=0.1,
 		)
-	except Exception:
-		return None, "llm_call_failed"
+	except Exception as e:
+		return None, f"llm_call_failed: {e}"
 
 	content = ""
 	if response.choices and response.choices[0].message:
