@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, cast
 
@@ -26,6 +27,7 @@ except ModuleNotFoundError:
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_DIR = PROJECT_ROOT / "output"
+OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
 
 def _to_float(value: Any, default: float = 0.0) -> float:
@@ -39,6 +41,21 @@ def load_eval_set(eval_path: Path) -> List[Dict[str, str]]:
     with eval_path.open("r", encoding="utf-8") as handle:
         data = cast(List[Dict[str, str]], json.load(handle))
     return [dict(item) for item in data]
+
+
+def _build_run_output_dir(now: datetime | None = None) -> Path:
+    run_time = now or datetime.now()
+    run_dir_name = run_time.strftime("%Y_%m_%d_%H_%M")
+    return OUTPUTS_DIR / run_dir_name
+
+
+def _write_pipeline_outputs(target_dir: Path, eval_payload: Dict[str, object], error_analysis: Dict[str, object]) -> None:
+    target_dir.mkdir(parents=True, exist_ok=True)
+    with (target_dir / "eval_results.json").open("w", encoding="utf-8") as handle:
+        json.dump(eval_payload, handle, indent=2)
+
+    with (target_dir / "error_analysis.json").open("w", encoding="utf-8") as handle:
+        json.dump(error_analysis, handle, indent=2)
 
 
 def _run_single_pass(
@@ -67,78 +84,25 @@ def run_pipeline() -> Dict[str, object]:
     tickets = load_eval_set(DATA_DIR / "eval_set.json")
     kb_index = preprocess_knowledge_base(kb_rows)
 
-    baseline = _run_single_pass(tickets, kb_index, aggressive_priority=False)
-    baseline_predictions, baseline_metrics, baseline_analysis, baseline_validation_rate = baseline
-    second_metrics: Dict[str, Any] = {}
-    second_validation_rate = 0.0
-
-    baseline_priority_accuracy = _to_float(baseline_metrics.get("priority_accuracy", 0.0))
-    should_iterate = baseline_priority_accuracy < 0.82
-    if should_iterate:
-        second = _run_single_pass(tickets, kb_index, aggressive_priority=True)
-        second_predictions, second_metrics, second_analysis, second_validation_rate = second
-
-        baseline_score = _to_float(baseline_metrics.get("category_accuracy_with_partial_credit", 0.0)) + _to_float(
-            baseline_metrics.get("priority_accuracy", 0.0)
-        ) + _to_float(baseline_metrics.get("response_quality_score", 0.0))
-        second_score = _to_float(second_metrics.get("category_accuracy_with_partial_credit", 0.0)) + _to_float(
-            second_metrics.get("priority_accuracy", 0.0)
-        ) + _to_float(second_metrics.get("response_quality_score", 0.0))
-
-        if second_score > baseline_score:
-            chosen_predictions = second_predictions
-            chosen_metrics = second_metrics
-            chosen_analysis = second_analysis
-            chosen_validation_rate = second_validation_rate
-            selected_iteration = "iteration_2_aggressive_priority"
-        else:
-            chosen_predictions = baseline_predictions
-            chosen_metrics = baseline_metrics
-            chosen_analysis = baseline_analysis
-            chosen_validation_rate = baseline_validation_rate
-            selected_iteration = "iteration_1_baseline"
-    else:
-        chosen_predictions = baseline_predictions
-        chosen_metrics = baseline_metrics
-        chosen_analysis = baseline_analysis
-        chosen_validation_rate = baseline_validation_rate
-        selected_iteration = "iteration_1_baseline"
-
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    predictions, metrics, error_analysis, validation_failure_rate = _run_single_pass(
+        tickets,
+        kb_index,
+        aggressive_priority=False,
+    )
 
     eval_payload = {
-        "selected_iteration": selected_iteration,
-        "validation_failure_rate": chosen_validation_rate,
-        "metrics": chosen_metrics,
-        "predictions": chosen_predictions,
-        "iteration_log": [
-            {
-                "name": "iteration_1_baseline",
-                "aggressive_priority": False,
-                "metrics": baseline_metrics,
-                "validation_failure_rate": baseline_validation_rate,
-            }
-        ],
+        "validation_failure_rate": validation_failure_rate,
+        "metrics": metrics,
+        "predictions": predictions,
     }
-    if should_iterate:
-        eval_payload["iteration_log"].append(
-            {
-                "name": "iteration_2_aggressive_priority",
-                "aggressive_priority": True,
-                "metrics": second_metrics,
-                "validation_failure_rate": second_validation_rate,
-            }
-        )
 
-    with (OUTPUT_DIR / "eval_results.json").open("w", encoding="utf-8") as handle:
-        json.dump(eval_payload, handle, indent=2)
-
-    with (OUTPUT_DIR / "error_analysis.json").open("w", encoding="utf-8") as handle:
-        json.dump(chosen_analysis, handle, indent=2)
+    run_output_dir = _build_run_output_dir()
+    _write_pipeline_outputs(run_output_dir, eval_payload, error_analysis)
+    _write_pipeline_outputs(OUTPUT_DIR, eval_payload, error_analysis)
 
     return {
         "eval_results": eval_payload,
-        "error_analysis": chosen_analysis,
+        "error_analysis": error_analysis,
     }
 
 
