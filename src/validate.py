@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Tuple
 
+from src.utils import coerce_non_negative_float, coerce_non_negative_int
+
 ALLOWED_CATEGORIES = {
 	"billing",
 	"bug",
@@ -24,6 +26,16 @@ def _ensure_flags(value: object) -> List[str]:
 	return []
 
 
+def _sanitize_usage(value: object) -> Dict[str, object]:
+	if not isinstance(value, dict):
+		return {"input_tokens": 0, "output_tokens": 0, "time_taken": 0.0}
+	return {
+		"input_tokens": coerce_non_negative_int(value.get("input_tokens", 0)),
+		"output_tokens": coerce_non_negative_int(value.get("output_tokens", 0)),
+		"time_taken": round(coerce_non_negative_float(value.get("time_taken", 0.0)), 6),
+	}
+
+
 def validate_prediction(prediction: Dict[str, object]) -> Tuple[Dict[str, object], List[str]]:
 	issues: List[str] = []
 
@@ -32,6 +44,7 @@ def validate_prediction(prediction: Dict[str, object]) -> Tuple[Dict[str, object
 	priority = str(prediction.get("priority", "medium")).strip().lower()
 	response = str(prediction.get("response", "")).strip()
 	flags = _ensure_flags(prediction.get("flags", []))
+	usage = _sanitize_usage(prediction.get("usage", {}))
 	confidence_raw = prediction.get("confidence", 0.0)
 
 	try:
@@ -64,5 +77,6 @@ def validate_prediction(prediction: Dict[str, object]) -> Tuple[Dict[str, object
 		"response": response,
 		"confidence": round(confidence, 3),
 		"flags": sorted(set(flags)),
+		"usage": usage,
 	}
 	return validated, issues

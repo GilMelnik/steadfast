@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from typing import Dict, List
 
 from src.preprocess import tokenize
+from src.utils import coerce_non_negative_float, coerce_non_negative_int
 
 PARTIAL_CATEGORY_MATCHES = {
 	("bug", "performance"),
@@ -17,6 +18,13 @@ PARTIAL_CATEGORY_MATCHES = {
 }
 
 PRIORITY_ORDER = ("low", "medium", "high", "critical")
+
+
+def _format_hh_mm_ss(seconds: float) -> str:
+	total_seconds = int(round(max(seconds, 0.0)))
+	hours, remainder = divmod(total_seconds, 3600)
+	minutes, secs = divmod(remainder, 60)
+	return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
 def _category_score(expected: str, predicted: str) -> float:
@@ -79,6 +87,9 @@ def evaluate_predictions(tickets: List[Dict[str, str]], predictions: List[Dict[s
 	priority_scores: List[float] = []
 	priority_exact_hits = 0
 	response_scores: List[float] = []
+	total_input_tokens = 0
+	total_output_tokens = 0
+	total_time_taken_seconds = 0.0
 
 	for ticket in tickets:
 		ticket_id = ticket["ticket_id"]
@@ -96,6 +107,13 @@ def evaluate_predictions(tickets: List[Dict[str, str]], predictions: List[Dict[s
 		response_score = _response_quality(ticket, pred, expected_category)
 		response_scores.append(response_score)
 
+		usage = pred.get("usage", {})
+		if not isinstance(usage, dict):
+			usage = {}
+		total_input_tokens += coerce_non_negative_int(usage.get("input_tokens", 0))
+		total_output_tokens += coerce_non_negative_int(usage.get("output_tokens", 0))
+		total_time_taken_seconds += coerce_non_negative_float(usage.get("time_taken", 0.0))
+
 		per_category[expected_category]["count"] += 1
 		per_category[expected_category]["category_score_sum"] += category_score
 
@@ -110,6 +128,9 @@ def evaluate_predictions(tickets: List[Dict[str, str]], predictions: List[Dict[s
 	priority_accuracy_exact = priority_exact_hits / total
 	priority_accuracy = sum(priority_scores) / total
 	response_quality = sum(response_scores) / total
+	avg_input_tokens = total_input_tokens / total
+	avg_output_tokens = total_output_tokens / total
+	avg_time_taken_seconds = total_time_taken_seconds / total
 
 	category_breakdown = {
 		key: {
@@ -147,4 +168,14 @@ def evaluate_predictions(tickets: List[Dict[str, str]], predictions: List[Dict[s
 		"per_category": category_breakdown,
 		"per_priority": priority_breakdown,
 		"top_confusions": top_confusions,
+		"resource_usage": {
+			"total_input_tokens": total_input_tokens,
+			"total_output_tokens": total_output_tokens,
+			"total_time_seconds": round(total_time_taken_seconds, 4),
+			"total_time_hh_mm_ss": _format_hh_mm_ss(total_time_taken_seconds),
+			"avg_input_tokens_per_ticket": round(avg_input_tokens, 4),
+			"avg_output_tokens_per_ticket": round(avg_output_tokens, 4),
+			"avg_time_seconds_per_ticket": round(avg_time_taken_seconds, 4),
+			"avg_time_hh_mm_ss_per_ticket": _format_hh_mm_ss(avg_time_taken_seconds),
+		},
 	}
