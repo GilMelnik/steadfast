@@ -43,6 +43,7 @@ PRIORITY_HINTS = {
 
 DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
 DEFAULT_LLM_MODEL = "claude-sonnet-4-6"
+DEFAULT_CONTEXT_RERANK_CANDIDATES = 6
 
 
 def _get_llm_config() -> Dict[str, str]:
@@ -133,7 +134,7 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 		client = OpenAI(api_key=config["api_key"], base_url=config["base_url"])
 		response = client.chat.completions.create(
 			model=config["model"],
-			messages=messages,
+			messages=cast(Any, messages),
 			temperature=0.1,
 		)
 	except Exception as e:
@@ -191,29 +192,210 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 
 
 def _score_overlap(ticket_tokens: set[str], example_tokens: set[str], subject: str, body: str) -> float:
+	ticket_text = normalize_text(subject + " " + body)
 	if not ticket_tokens or not example_tokens:
 		overlap = 0.0
 	else:
 		overlap = len(ticket_tokens.intersection(example_tokens)) / max(len(ticket_tokens), 1)
-	semantic_ratio = SequenceMatcher(None, normalize_text(subject + " " + body), " ".join(example_tokens)).ratio()
-	return 0.75 * overlap + 0.25 * semantic_ratio
+	semantic_ratio = SequenceMatcher(None, ticket_text, " ".join(sorted(example_tokens))).ratio()
+	return 0.65 * overlap + 0.35 * semantic_ratio
 
 
-def retrieve_context(ticket: Dict[str, str], kb_index: Dict[str, object], top_k: int = 4) -> List[Dict[str, object]]:
-	ticket_tokens = tokenize(" ".join((ticket.get("subject", ""), ticket.get("body", ""))))
+def _bm25_like_score(query_tokens: set[str], example_tokens: set[str], idf: Dict[str, float], avg_doc_len: float) -> float:
+	if not query_tokens or not example_tokens:
+		return 0.0
+	k1 = 1.5
+	b = 0.75
+	doc_len = max(len(example_tokens), 1)
+	normalization = 1.0 - b + b * (doc_len / max(avg_doc_len, 1.0))
+	score = 0.0
+	for token in query_tokens.intersection(example_tokens):
+		idf_value = float(idf.get(token, 0.35))
+		tf = 1.0
+		score += idf_value * ((tf * (k1 + 1.0)) / (tf + (k1 * normalization)))
+	return score
+
+
+def _intent_signal_score(ticket_text: str, example: Dict[str, object]) -> float:
+	intent_tokens = tokenize(ticket_text)
+	if not intent_tokens:
+		return 0.0
+
+	category = str(example.get("category", ""))
+	priority = str(example.get("priority", ""))
+	score = 0.0
+
+	for hint in CATEGORY_HINTS.get(category, set()):
+		if hint in ticket_text:
+			score += 0.22
+
+	for hint in PRIORITY_HINTS.get(priority, set()):
+		if hint in ticket_text:
+			score += 0.14
+
+	common = len(intent_tokens.intersection(cast(set[str], example.get("tokens", set()))))
+	if common >= 3:
+		score += 0.2
+	return score
+
+
+def _semantic_score(ticket_text: str, example: Dict[str, object]) -> float:
+	example_text = str(example.get("search_text", ""))
+	if not example_text:
+		example_text = normalize_text(
+			" ".join(
+				(
+					str(example.get("subject", "")),
+					str(example.get("body", "")),
+					str(example.get("resolution", "")),
+				)
+			)
+		)
+	return SequenceMatcher(None, ticket_text, example_text).ratio()
+
+
+def _rank_context_examples(
+	ticket: Dict[str, str],
+	kb_index: Dict[str, object],
+	candidate_pool_size: int,
+) -> List[Tuple[float, Dict[str, object]]]:
+	ticket_text = normalize_text(" ".join((ticket.get("subject", ""), ticket.get("body", ""))))
+	ticket_tokens = tokenize(ticket_text)
+
+	idf = cast(Dict[str, float], kb_index.get("idf", {}))
+	avg_doc_len_value = kb_index.get("avg_doc_len", 1.0)
+	try:
+		avg_doc_len = float(str(avg_doc_len_value))
+	except (TypeError, ValueError):
+		avg_doc_len = 1.0
+	avg_doc_len = max(avg_doc_len, 1.0)
 	scored: List[Tuple[float, Dict[str, object]]] = []
 	examples = cast(List[Dict[str, Any]], kb_index.get("examples", []))
+
 	for example_any in examples:
 		example = cast(Dict[str, object], example_any)
-		score = _score_overlap(
-			ticket_tokens,
-			cast(set[str], example["tokens"]),
-			ticket.get("subject", ""),
-			ticket.get("body", ""),
-		)
+		example_tokens = cast(set[str], example.get("tokens", set()))
+		lexical = _bm25_like_score(ticket_tokens, example_tokens, idf, avg_doc_len)
+		semantic = _semantic_score(ticket_text, example)
+		overlap = _score_overlap(ticket_tokens, example_tokens, ticket.get("subject", ""), ticket.get("body", ""))
+		intent = _intent_signal_score(ticket_text, example)
+		score = (0.44 * lexical) + (0.24 * overlap) + (0.22 * semantic) + (0.10 * intent)
 		scored.append((score, example))
+
 	scored.sort(key=lambda pair: pair[0], reverse=True)
-	return [example for _, example in scored[:top_k]]
+	return scored[:candidate_pool_size]
+
+
+def _is_context_rerank_enabled() -> bool:
+	flag = (os.getenv("LSP_CONTEXT_RERANK") or "").strip().lower()
+	return flag in {"1", "true", "yes", "on"}
+
+
+def _make_context_rerank_messages(ticket: Dict[str, str], candidates: List[Dict[str, object]]) -> List[Dict[str, str]]:
+	candidate_lines: List[str] = []
+	for candidate in candidates:
+		candidate_lines.append(
+			" | ".join(
+				[
+					f"ticket_id={candidate.get('ticket_id', '')}",
+					f"category={candidate.get('category', '')}",
+					f"priority={candidate.get('priority', '')}",
+					f"subject={candidate.get('subject', '')}",
+					f"resolution={candidate.get('resolution_summary', '')}",
+				]
+			)
+		)
+
+	system_prompt = (
+		"You rank historical support examples by relevance for grounding a response. "
+		"Return strict JSON only with key ranked_ticket_ids as an array of ticket IDs in descending relevance."
+	)
+	user_prompt = (
+		f"Ticket subject: {ticket.get('subject', '')}\n"
+		f"Ticket body: {ticket.get('body', '')}\n\n"
+		"Candidates:\n"
+		+ "\n".join(candidate_lines)
+	)
+	return [
+		{"role": "user", "content": system_prompt},
+		{"role": "user", "content": user_prompt},
+	]
+
+
+def _rerank_with_llm(
+	ticket: Dict[str, str],
+	candidates: List[Dict[str, object]],
+) -> Tuple[List[Dict[str, object]], Optional[str]]:
+	if not candidates:
+		return candidates, None
+
+	config = _get_llm_config()
+	if not config["api_key"]:
+		return candidates, "context_rerank_skipped_missing_api_key"
+
+	try:
+		from openai import OpenAI
+	except ImportError:
+		return candidates, "context_rerank_skipped_missing_openai_dependency"
+
+	try:
+		client = OpenAI(api_key=config["api_key"], base_url=config["base_url"])
+		response = client.chat.completions.create(
+			model=config["model"],
+			messages=cast(Any, _make_context_rerank_messages(ticket, candidates)),
+			temperature=0.0,
+		)
+	except Exception as e:
+		return candidates, f"context_rerank_failed: {e}"
+
+	content = ""
+	if response.choices and response.choices[0].message:
+		content = response.choices[0].message.content or ""
+
+	payload = _extract_json_payload(content)
+	if payload is None:
+		return candidates, "context_rerank_invalid_json"
+
+	ranked_ids_raw = payload.get("ranked_ticket_ids", [])
+	if not isinstance(ranked_ids_raw, list):
+		return candidates, "context_rerank_invalid_payload"
+
+	ranked_ids = [str(item) for item in ranked_ids_raw]
+	if not ranked_ids:
+		return candidates, "context_rerank_empty_ranking"
+
+	by_id = {str(candidate.get("ticket_id", "")): candidate for candidate in candidates}
+	reordered: List[Dict[str, object]] = []
+	seen = set()
+	for ticket_id in ranked_ids:
+		candidate = by_id.get(ticket_id)
+		if candidate is None:
+			continue
+		reordered.append(candidate)
+		seen.add(ticket_id)
+
+	for candidate_any in candidates:
+		candidate = cast(Dict[str, object], candidate_any)
+		ticket_id = str(candidate.get("ticket_id", ""))
+		if ticket_id in seen:
+			continue
+		reordered.append(candidate)
+
+	return reordered, None
+
+
+def retrieve_context(ticket: Dict[str, str], kb_index: Dict[str, object], top_k: int = 5) -> List[Dict[str, object]]:
+	top_k = max(top_k, 1)
+	candidate_pool_size = max(top_k * 3, DEFAULT_CONTEXT_RERANK_CANDIDATES)
+	ranked = _rank_context_examples(ticket, kb_index, candidate_pool_size=candidate_pool_size)
+	selected = [example for _, example in ranked]
+
+	if _is_context_rerank_enabled():
+		rerank_window = selected[:DEFAULT_CONTEXT_RERANK_CANDIDATES]
+		reranked, _ = _rerank_with_llm(ticket, rerank_window)
+		selected = reranked + selected[DEFAULT_CONTEXT_RERANK_CANDIDATES:]
+
+	return selected[:top_k]
 
 
 def _guess_category(ticket_text: str, context_examples: List[Dict[str, object]]) -> str:
@@ -329,6 +511,8 @@ def classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict
 	result = _classify_ticket(ticket, kb_index)
 	end_time = time.time()
 	time_taken = end_time - start_time
-	usage = result.get("usage", {})
+	usage_any = result.get("usage", {})
+	usage = cast(Dict[str, object], usage_any if isinstance(usage_any, dict) else {})
 	usage["time_taken"] = time_taken
+	result["usage"] = usage
 	return result

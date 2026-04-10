@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import math
 import re
 from pathlib import Path
 from typing import Dict, List, Set
@@ -60,6 +61,8 @@ def preprocess_knowledge_base(kb_rows: List[Dict[str, str]]) -> Dict[str, object
 	examples: List[Dict[str, object]] = []
 	category_keywords: Dict[str, Set[str]] = {}
 	priority_keywords: Dict[str, Set[str]] = {}
+	document_frequency: Dict[str, int] = {}
+	total_token_count = 0
 
 	for row in kb_rows:
 		subject = row.get("subject", "")
@@ -69,8 +72,12 @@ def preprocess_knowledge_base(kb_rows: List[Dict[str, str]]) -> Dict[str, object
 		priority = row.get("priority", "").strip().lower()
 
 		combined = " ".join((subject, body, resolution))
+		normalized_combined = normalize_text(combined)
 		tokens = tokenize(combined)
 		resolution_summary = normalize_whitespace(resolution)[:320]
+		total_token_count += len(tokens)
+		for token in tokens:
+			document_frequency[token] = document_frequency.get(token, 0) + 1
 
 		example = {
 			"ticket_id": row.get("ticket_id", ""),
@@ -81,6 +88,7 @@ def preprocess_knowledge_base(kb_rows: List[Dict[str, str]]) -> Dict[str, object
 			"body": body,
 			"resolution": resolution,
 			"resolution_summary": resolution_summary,
+			"search_text": normalized_combined,
 			"tokens": tokens,
 		}
 		examples.append(example)
@@ -88,8 +96,17 @@ def preprocess_knowledge_base(kb_rows: List[Dict[str, str]]) -> Dict[str, object
 		category_keywords.setdefault(category, set()).update(tokens)
 		priority_keywords.setdefault(priority, set()).update(tokens)
 
+	num_examples = max(len(examples), 1)
+	avg_doc_len = total_token_count / num_examples
+	idf = {
+		token: math.log(1.0 + (num_examples - freq + 0.5) / (freq + 0.5))
+		for token, freq in document_frequency.items()
+	}
+
 	return {
 		"examples": examples,
 		"category_keywords": category_keywords,
 		"priority_keywords": priority_keywords,
+		"idf": idf,
+		"avg_doc_len": avg_doc_len,
 	}
