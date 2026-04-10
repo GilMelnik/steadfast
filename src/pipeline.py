@@ -61,7 +61,6 @@ def _write_pipeline_outputs(target_dir: Path, eval_payload: Dict[str, object], e
 def _run_single_pass(
     tickets: List[Dict[str, str]],
     kb_index: Dict[str, object],
-    aggressive_priority: bool,
 ) -> Tuple[List[Dict[str, object]], Dict[str, object], Dict[str, object], float]:
     predictions: List[Dict[str, object]] = []
     validation_issue_count = 0
@@ -70,7 +69,7 @@ def _run_single_pass(
         raw = classify_ticket(ticket, kb_index)
         validated, validation_issues = validate_prediction(raw)
         validation_issue_count += len(validation_issues)
-        final = apply_heuristics(ticket, validated, aggressive_priority=aggressive_priority)
+        final = apply_heuristics(ticket, validated)
         predictions.append(final)
 
     metrics = evaluate_predictions(tickets, predictions)
@@ -87,7 +86,6 @@ def run_pipeline() -> Dict[str, object]:
     predictions, metrics, error_analysis, validation_failure_rate = _run_single_pass(
         tickets,
         kb_index,
-        aggressive_priority=False,
     )
 
     eval_payload = {
