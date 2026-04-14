@@ -61,31 +61,51 @@ def _write_pipeline_outputs(target_dir: Path, eval_payload: Dict[str, object], e
 def _run_single_pass(
     tickets: List[Dict[str, str]],
     kb_index: Dict[str, object],
+    verbose: bool = False,
 ) -> Tuple[List[Dict[str, object]], Dict[str, object], Dict[str, object], float]:
     predictions: List[Dict[str, object]] = []
     validation_issue_count = 0
 
-    for ticket in tickets:
+    for i, ticket in enumerate(tickets):
         raw = classify_ticket(ticket, kb_index)
         validated, validation_issues = validate_prediction(raw)
         validation_issue_count += len(validation_issues)
         final = apply_heuristics(ticket, validated)
         predictions.append(final)
 
+        if verbose:
+            print(
+                f"[{i + 1}/{len(tickets)}] ticket_id={ticket.get('ticket_id', '?')} | "
+                f"category={final.get('category', '?')} | "
+                f"priority={final.get('priority', '?')} | "
+                f"validation_issues={len(validation_issues)}"
+            )
+
     metrics = evaluate_predictions(tickets, predictions)
     error_analysis = analyze_errors(tickets, predictions)
     validation_failure_rate = validation_issue_count / max(len(tickets), 1)
+
+    if verbose:
+        print("\n--- Metrics ---")
+        for key, value in metrics.items():
+            print(f"  {key}: {value}")
+        print(f"  validation_failure_rate: {round(validation_failure_rate, 4)}")
+
     return predictions, metrics, error_analysis, round(validation_failure_rate, 4)
 
 
-def run_pipeline() -> Dict[str, object]:
+def run_pipeline(verbose: bool = False) -> Dict[str, object]:
     kb_rows = load_knowledge_base(DATA_DIR / "knowledge_base.csv")
     tickets = load_eval_set(DATA_DIR / "eval_set.json")
     kb_index = preprocess_knowledge_base(kb_rows)
 
+    if verbose:
+        print(f"Loaded {len(kb_rows)} knowledge base rows and {len(tickets)} tickets.")
+
     predictions, metrics, error_analysis, validation_failure_rate = _run_single_pass(
         tickets,
         kb_index,
+        verbose=verbose,
     )
 
     eval_payload = {
@@ -98,6 +118,9 @@ def run_pipeline() -> Dict[str, object]:
     _write_pipeline_outputs(run_output_dir, eval_payload, error_analysis)
     _write_pipeline_outputs(OUTPUT_DIR, eval_payload, error_analysis)
 
+    if verbose:
+        print(f"\nOutputs written to: {run_output_dir}")
+
     return {
         "eval_results": eval_payload,
         "error_analysis": error_analysis,
@@ -105,7 +128,7 @@ def run_pipeline() -> Dict[str, object]:
 
 
 if __name__ == "__main__":
-    result = run_pipeline()
+    result = run_pipeline(verbose=True)
     eval_metrics = cast(Dict[str, Any], cast(Dict[str, Any], result["eval_results"])["metrics"])
     print(
         "Pipeline complete | "
