@@ -8,21 +8,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, cast
 
-try:
-    from src.agent import classify_ticket
-    from src.analyze import analyze_errors, render_pipeline_visualizations
-    from src.evaluate import evaluate_predictions
-    from src.postprocess import apply_heuristics
-    from src.preprocess import load_knowledge_base, preprocess_knowledge_base
-    from src.validate import validate_prediction
-except ModuleNotFoundError:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from src.agent import classify_ticket
-    from src.analyze import analyze_errors, render_pipeline_visualizations
-    from src.evaluate import evaluate_predictions
-    from src.postprocess import apply_heuristics
-    from src.preprocess import load_knowledge_base, preprocess_knowledge_base
-    from src.validate import validate_prediction
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.agent import classify_ticket
+from src.analyze import analyze_errors
+from src.evaluate import evaluate_predictions
+from src.postprocess import apply_heuristics
+from src.preprocess import load_knowledge_base, preprocess_knowledge_base
+from src.validate import validate_prediction
+from src.visualize import render_pipeline_visualizations
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -116,21 +111,13 @@ def run_pipeline(verbose: bool = False, plot: bool = True) -> Dict[str, object]:
 
     run_output_dir = _build_run_output_dir()
     if plot:
-        visualization_files = render_pipeline_visualizations(
-            tickets,
-            predictions,
-            metrics,
-            error_analysis,
-            run_output_dir,
-        )
         render_pipeline_visualizations(
             tickets,
             predictions,
             metrics,
             error_analysis,
-            OUTPUT_DIR,
+            [run_output_dir, OUTPUT_DIR],
         )
-        eval_payload["visualization_files"] = visualization_files
     _write_pipeline_outputs(run_output_dir, eval_payload, error_analysis)
     _write_pipeline_outputs(OUTPUT_DIR, eval_payload, error_analysis)
 
@@ -144,7 +131,7 @@ def run_pipeline(verbose: bool = False, plot: bool = True) -> Dict[str, object]:
 
 
 def _parse_pipeline_args(args: List[str]) -> tuple[bool, bool]:
-    verbose = "--quiet" not in args
+    verbose = "--verbose" in args
     plot = "--plot" in args
     return verbose, plot
 

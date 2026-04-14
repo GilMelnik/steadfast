@@ -22,6 +22,19 @@ ERROR_ANALYSIS_FILENAMES = (
     "error_priority_confusions.png",
     "error_flag_frequency.png",
 )
+OutputPathInput = Path | Sequence[Path] | str | List[str]
+
+
+def _normalize_output_dirs(output_dirs: OutputPathInput) -> List[Path]:
+    if isinstance(output_dirs, Path):
+        return [output_dirs]
+    if isinstance(output_dirs, str):
+        return [Path(output_dirs)]
+
+    normalized = [Path(output_dir) for output_dir in output_dirs]
+    if not normalized:
+        raise ValueError("At least one output directory must be provided.")
+    return normalized
 
 
 def _load_pyplot():
@@ -48,12 +61,12 @@ def _save_figure(fig: object, output_path: Path) -> None:
 
 
 def _plot_bar_chart(
-    labels: Sequence[str],
-    values: Sequence[float],
-    counts: Sequence[int],
-    title: str,
-    ylabel: str,
-    output_path: Path,
+        labels: Sequence[str],
+        values: Sequence[float],
+        counts: Sequence[int],
+        title: str,
+        ylabel: str,
+        output_path: Path,
 ) -> None:
     plt = _load_pyplot()
     fig, ax = plt.subplots(figsize=(10, max(4, len(labels) * 0.7)))
@@ -81,11 +94,11 @@ def _plot_bar_chart(
 
 
 def _plot_vertical_bar_chart(
-    labels: Sequence[str],
-    values: Sequence[float],
-    title: str,
-    ylabel: str,
-    output_path: Path,
+        labels: Sequence[str],
+        values: Sequence[float],
+        title: str,
+        ylabel: str,
+        output_path: Path,
 ) -> None:
     plt = _load_pyplot()
     fig, ax = plt.subplots(figsize=(max(8, len(labels) * 0.85), 5))
@@ -113,10 +126,10 @@ def _plot_vertical_bar_chart(
 
 
 def _plot_confusion_matrix(
-    matrix: List[List[int]],
-    labels: Sequence[str],
-    title: str,
-    output_path: Path,
+        matrix: List[List[int]],
+        labels: Sequence[str],
+        title: str,
+        output_path: Path,
 ) -> None:
     plt = _load_pyplot()
     fig, ax = plt.subplots(figsize=(max(6, len(labels) * 1.2), max(5, len(labels) * 1.0)))
@@ -173,10 +186,10 @@ def _plot_overall_metrics(metrics: Dict[str, float], output_path: Path) -> None:
 
 
 def _plot_score_distributions(
-    category_scores: Sequence[float],
-    priority_scores: Sequence[float],
-    response_scores: Sequence[float],
-    output_path: Path,
+        category_scores: Sequence[float],
+        priority_scores: Sequence[float],
+        response_scores: Sequence[float],
+        output_path: Path,
 ) -> None:
     plt = _load_pyplot()
     fig, axes = plt.subplots(1, 3, figsize=(15, 4.2), sharey=True)
@@ -198,7 +211,8 @@ def _plot_score_distributions(
     _save_figure(fig, output_path)
 
 
-def _labels_in_order(expected_labels: Sequence[str], predicted_labels: Sequence[str], priority: bool = False) -> List[str]:
+def _labels_in_order(expected_labels: Sequence[str], predicted_labels: Sequence[str], priority: bool = False) -> List[
+    str]:
     ordered: List[str] = []
     seen = set()
 
@@ -216,12 +230,25 @@ def _labels_in_order(expected_labels: Sequence[str], predicted_labels: Sequence[
     return ordered
 
 
-def render_evaluation_visualizations(
-    tickets: List[Dict[str, str]],
-    predictions: List[Dict[str, object]],
-    metrics: Dict[str, object],
-    output_dir: Path,
+def render_pipeline_visualizations(
+        tickets: List[Dict[str, str]],
+        predictions: List[Dict[str, object]],
+        metrics: Dict[str, object],
+        error_analysis: Dict[str, object],
+        output_paths: OutputPathInput,
 ) -> List[str]:
+    files = render_evaluation_visualizations(tickets, predictions, metrics, output_paths)
+    files.extend(render_error_analysis_visualizations(error_analysis, output_paths))
+    return files
+
+
+def render_evaluation_visualizations(
+        tickets: List[Dict[str, str]],
+        predictions: List[Dict[str, object]],
+        metrics: Dict[str, object],
+        output_dirs: OutputPathInput,
+) -> List[str]:
+    resolved_output_dirs = _normalize_output_dirs(output_dirs)
     by_ticket = {str(pred["ticket_id"]): pred for pred in predictions}
     category_scores: List[float] = []
     priority_scores: List[float] = []
@@ -255,28 +282,30 @@ def render_evaluation_visualizations(
         category_labels = list(per_category.keys())
         category_values = [float(dict(value).get("avg_category_score", 0.0)) for value in per_category.values()]
         category_counts = [int(dict(value).get("count", 0)) for value in per_category.values()]
-        _plot_bar_chart(
-            category_labels,
-            category_values,
-            category_counts,
-            title="Average Category Scores by Expected Category",
-            ylabel="Average score",
-            output_path=output_dir / "category_scores.png",
-        )
+        for output_dir in resolved_output_dirs:
+            _plot_bar_chart(
+                category_labels,
+                category_values,
+                category_counts,
+                title="Average Category Scores by Expected Category",
+                ylabel="Average score",
+                output_path=output_dir / "category_scores.png",
+            )
 
     per_priority = metrics.get("per_priority", {})
     if isinstance(per_priority, dict) and per_priority:
         priority_labels = list(per_priority.keys())
         priority_values = [float(dict(value).get("avg_priority_score", 0.0)) for value in per_priority.values()]
         priority_counts = [int(dict(value).get("count", 0)) for value in per_priority.values()]
-        _plot_bar_chart(
-            priority_labels,
-            priority_values,
-            priority_counts,
-            title="Average Priority Scores by Expected Priority",
-            ylabel="Average score",
-            output_path=output_dir / "priority_scores.png",
-        )
+        for output_dir in resolved_output_dirs:
+            _plot_bar_chart(
+                priority_labels,
+                priority_values,
+                priority_counts,
+                title="Average Priority Scores by Expected Priority",
+                ylabel="Average score",
+                output_path=output_dir / "priority_scores.png",
+            )
 
     overall_metrics = {
         "Category Exact": float(metrics.get("category_accuracy_exact", 0.0)),
@@ -285,46 +314,55 @@ def render_evaluation_visualizations(
         "Priority": float(metrics.get("priority_accuracy", 0.0)),
         "Response": float(metrics.get("response_quality_score", 0.0)),
     }
-    _plot_overall_metrics(overall_metrics, output_dir / "overall_metric_scores.png")
-    _plot_score_distributions(category_scores, priority_scores, response_scores, output_dir / "score_distributions.png")
+    for output_dir in resolved_output_dirs:
+        _plot_overall_metrics(overall_metrics, output_dir / "overall_metric_scores.png")
+        _plot_score_distributions(category_scores, priority_scores, response_scores,
+                                  output_dir / "score_distributions.png")
 
     category_labels = _labels_in_order(expected_categories, predicted_categories)
     category_index = {label: idx for idx, label in enumerate(category_labels)}
     category_matrix = [[0 for _ in category_labels] for _ in category_labels]
     for expected, predicted in zip(expected_categories, predicted_categories):
         category_matrix[category_index[expected]][category_index[predicted]] += 1
-    _plot_confusion_matrix(
-        category_matrix,
-        category_labels,
-        title="Category Confusion Matrix",
-        output_path=output_dir / "category_confusion_matrix.png",
-    )
+    for output_dir in resolved_output_dirs:
+        _plot_confusion_matrix(
+            category_matrix,
+            category_labels,
+            title="Category Confusion Matrix",
+            output_path=output_dir / "category_confusion_matrix.png",
+        )
 
     priority_labels = _labels_in_order(expected_priorities, predicted_priorities, priority=True)
     priority_index = {label: idx for idx, label in enumerate(priority_labels)}
     priority_matrix = [[0 for _ in priority_labels] for _ in priority_labels]
     for expected, predicted in zip(expected_priorities, predicted_priorities):
         priority_matrix[priority_index[expected]][priority_index[predicted]] += 1
-    _plot_confusion_matrix(
-        priority_matrix,
-        priority_labels,
-        title="Priority Confusion Matrix",
-        output_path=output_dir / "priority_confusion_matrix.png",
-    )
+    for output_dir in resolved_output_dirs:
+        _plot_confusion_matrix(
+            priority_matrix,
+            priority_labels,
+            title="Priority Confusion Matrix",
+            output_path=output_dir / "priority_confusion_matrix.png",
+        )
 
     return list(VISUALIZATION_FILENAMES)
 
 
-def render_error_analysis_visualizations(error_analysis: Dict[str, object], output_dir: Path) -> List[str]:
+def render_error_analysis_visualizations(
+        error_analysis: Dict[str, object],
+        output_dirs: OutputPathInput,
+) -> List[str]:
+    resolved_output_dirs = _normalize_output_dirs(output_dirs)
     root_causes = error_analysis.get("root_causes", {})
     if isinstance(root_causes, dict) and root_causes:
-        _plot_vertical_bar_chart(
-            list(root_causes.keys()),
-            [float(value) for value in root_causes.values()],
-            title="Error Root Causes",
-            ylabel="Ticket count",
-            output_path=output_dir / "error_root_causes.png",
-        )
+        for output_dir in resolved_output_dirs:
+            _plot_vertical_bar_chart(
+                list(root_causes.keys()),
+                [float(value) for value in root_causes.values()],
+                title="Error Root Causes",
+                ylabel="Ticket count",
+                output_path=output_dir / "error_root_causes.png",
+            )
 
     top_category_confusions = error_analysis.get("top_category_confusions", [])
     if isinstance(top_category_confusions, list) and top_category_confusions:
@@ -339,13 +377,14 @@ def render_error_analysis_visualizations(error_analysis: Dict[str, object], outp
             if isinstance(item, dict)
         ]
         if category_labels:
-            _plot_vertical_bar_chart(
-                category_labels,
-                category_counts,
-                title="Top Category Confusions",
-                ylabel="Ticket count",
-                output_path=output_dir / "error_category_confusions.png",
-            )
+            for output_dir in resolved_output_dirs:
+                _plot_vertical_bar_chart(
+                    category_labels,
+                    category_counts,
+                    title="Top Category Confusions",
+                    ylabel="Ticket count",
+                    output_path=output_dir / "error_category_confusions.png",
+                )
 
     top_priority_confusions = error_analysis.get("top_priority_confusions", [])
     if isinstance(top_priority_confusions, list) and top_priority_confusions:
@@ -360,13 +399,14 @@ def render_error_analysis_visualizations(error_analysis: Dict[str, object], outp
             if isinstance(item, dict)
         ]
         if priority_labels:
-            _plot_vertical_bar_chart(
-                priority_labels,
-                priority_counts,
-                title="Top Priority Confusions",
-                ylabel="Ticket count",
-                output_path=output_dir / "error_priority_confusions.png",
-            )
+            for output_dir in resolved_output_dirs:
+                _plot_vertical_bar_chart(
+                    priority_labels,
+                    priority_counts,
+                    title="Top Priority Confusions",
+                    ylabel="Ticket count",
+                    output_path=output_dir / "error_priority_confusions.png",
+                )
 
     flag_frequency = error_analysis.get("flag_frequency", {})
     if isinstance(flag_frequency, dict) and flag_frequency:
@@ -374,72 +414,72 @@ def render_error_analysis_visualizations(error_analysis: Dict[str, object], outp
             ((str(key), float(value)) for key, value in flag_frequency.items()),
             key=lambda item: (-item[1], item[0]),
         )[:12]
-        _plot_bar_chart(
-            [label for label, _ in top_flags],
-            [value for _, value in top_flags],
-            [int(value) for _, value in top_flags],
-            title="Top Error Flags",
-            ylabel="Flag count",
-            output_path=output_dir / "error_flag_frequency.png",
-        )
+        for output_dir in resolved_output_dirs:
+            _plot_bar_chart(
+                [label for label, _ in top_flags],
+                [value for _, value in top_flags],
+                [int(value) for _, value in top_flags],
+                title="Top Error Flags",
+                ylabel="Flag count",
+                output_path=output_dir / "error_flag_frequency.png",
+            )
 
     return list(ERROR_ANALYSIS_FILENAMES)
 
 
 def render_saved_output_visualizations(
-	eval_results_path: Path,
-	error_analysis_path: Path | None = None,
-	output_dir: Path | None = None,
+        eval_results_path: Path,
+        error_analysis_path: Path | None = None,
+        output_dir: OutputPathInput | None = None,
 ) -> List[str]:
-	eval_results = json.loads(eval_results_path.read_text(encoding="utf-8"))
-	if not isinstance(eval_results, dict):
-		raise ValueError(f"{eval_results_path} must contain a JSON object.")
+    eval_results = json.loads(eval_results_path.read_text(encoding="utf-8"))
+    if not isinstance(eval_results, dict):
+        raise ValueError(f"{eval_results_path} must contain a JSON object.")
 
-	target_dir = output_dir or eval_results_path.parent
-	tickets_path = target_dir / "eval_set.json"
-	if tickets_path.exists():
-		tickets = json.loads(tickets_path.read_text(encoding="utf-8"))
-	else:
-		project_eval_set = Path(__file__).resolve().parents[1] / "data" / "eval_set.json"
-		tickets = json.loads(project_eval_set.read_text(encoding="utf-8"))
-	if not isinstance(tickets, list):
-		raise ValueError("Ticket source for visualization must be a JSON array.")
+    resolved_output_dirs = _normalize_output_dirs(output_dir or eval_results_path.parent)
+    tickets_path = resolved_output_dirs[0] / "eval_set.json"
+    if tickets_path.exists():
+        tickets = json.loads(tickets_path.read_text(encoding="utf-8"))
+    else:
+        project_eval_set = Path(__file__).resolve().parents[1] / "data" / "eval_set.json"
+        tickets = json.loads(project_eval_set.read_text(encoding="utf-8"))
+    if not isinstance(tickets, list):
+        raise ValueError("Ticket source for visualization must be a JSON array.")
 
-	metrics = eval_results.get("metrics", {})
-	predictions = eval_results.get("predictions", [])
-	if not isinstance(metrics, dict):
-		raise ValueError(f"{eval_results_path} is missing an object-valued 'metrics' field.")
-	if not isinstance(predictions, list):
-		raise ValueError(f"{eval_results_path} is missing a list-valued 'predictions' field.")
+    metrics = eval_results.get("metrics", {})
+    predictions = eval_results.get("predictions", [])
+    if not isinstance(metrics, dict):
+        raise ValueError(f"{eval_results_path} is missing an object-valued 'metrics' field.")
+    if not isinstance(predictions, list):
+        raise ValueError(f"{eval_results_path} is missing a list-valued 'predictions' field.")
 
-	files = render_evaluation_visualizations(
-		[dict(item) for item in tickets if isinstance(item, dict)],
-		[dict(item) for item in predictions if isinstance(item, dict)],
-		metrics,
-		target_dir,
-	)
+    files = render_evaluation_visualizations(
+        [dict(item) for item in tickets if isinstance(item, dict)],
+        [dict(item) for item in predictions if isinstance(item, dict)],
+        metrics,
+        resolved_output_dirs,
+    )
 
-	if error_analysis_path is not None:
-		error_analysis = json.loads(error_analysis_path.read_text(encoding="utf-8"))
-		if not isinstance(error_analysis, dict):
-			raise ValueError(f"{error_analysis_path} must contain a JSON object.")
-		files.extend(render_error_analysis_visualizations(error_analysis, target_dir))
+    if error_analysis_path is not None:
+        error_analysis = json.loads(error_analysis_path.read_text(encoding="utf-8"))
+        if not isinstance(error_analysis, dict):
+            raise ValueError(f"{error_analysis_path} must contain a JSON object.")
+        files.extend(render_error_analysis_visualizations(error_analysis, resolved_output_dirs))
 
-	return files
-
+    return files
 
 
 if __name__ == "__main__":
-    outputs_dir = Path("outputs")
-    for output_dir in outputs_dir.iterdir():
-        if not output_dir.is_dir():
+    outputs_path = Path("outputs")
+    for output_path in outputs_path.iterdir():
+        if not output_path.is_dir():
             continue
-        eval_results_path = output_dir / "eval_results.json"
-        error_analysis_path = output_dir / "error_analysis.json"
+        eval_results_path = output_path / "eval_results.json"
+        error_analysis_path = output_path / "error_analysis.json"
         files = render_saved_output_visualizations(
             eval_results_path=eval_results_path,
             error_analysis_path=error_analysis_path,
-            output_dir=output_dir,
+            output_dir=output_path,
         )
         print("Generated visualization files:")
         for file_name in files:
