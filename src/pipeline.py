@@ -10,24 +10,16 @@ from typing import Any, Dict, List, Tuple, cast
 
 try:
     from src.agent import classify_ticket
-    from src.analyze import analyze_errors
-    from src.evaluate import (
-        evaluate_predictions,
-        render_error_analysis_visualizations,
-        render_evaluation_visualizations,
-    )
+    from src.analyze import analyze_errors, render_pipeline_visualizations
+    from src.evaluate import evaluate_predictions
     from src.postprocess import apply_heuristics
     from src.preprocess import load_knowledge_base, preprocess_knowledge_base
     from src.validate import validate_prediction
 except ModuleNotFoundError:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from src.agent import classify_ticket
-    from src.analyze import analyze_errors
-    from src.evaluate import (
-        evaluate_predictions,
-        render_error_analysis_visualizations,
-        render_evaluation_visualizations,
-    )
+    from src.analyze import analyze_errors, render_pipeline_visualizations
+    from src.evaluate import evaluate_predictions
     from src.postprocess import apply_heuristics
     from src.preprocess import load_knowledge_base, preprocess_knowledge_base
     from src.validate import validate_prediction
@@ -102,7 +94,7 @@ def _run_single_pass(
     return predictions, metrics, error_analysis, round(validation_failure_rate, 4)
 
 
-def run_pipeline(verbose: bool = False) -> Dict[str, object]:
+def run_pipeline(verbose: bool = False, plot: bool = True) -> Dict[str, object]:
     kb_rows = load_knowledge_base(DATA_DIR / "knowledge_base.csv")
     tickets = load_eval_set(DATA_DIR / "eval_set.json")
     kb_index = preprocess_knowledge_base(kb_rows)
@@ -123,11 +115,22 @@ def run_pipeline(verbose: bool = False) -> Dict[str, object]:
     }
 
     run_output_dir = _build_run_output_dir()
-    visualization_files = render_evaluation_visualizations(tickets, predictions, metrics, run_output_dir)
-    visualization_files.extend(render_error_analysis_visualizations(error_analysis, run_output_dir))
-    render_evaluation_visualizations(tickets, predictions, metrics, OUTPUT_DIR)
-    render_error_analysis_visualizations(error_analysis, OUTPUT_DIR)
-    eval_payload["visualization_files"] = visualization_files
+    if plot:
+        visualization_files = render_pipeline_visualizations(
+            tickets,
+            predictions,
+            metrics,
+            error_analysis,
+            run_output_dir,
+        )
+        render_pipeline_visualizations(
+            tickets,
+            predictions,
+            metrics,
+            error_analysis,
+            OUTPUT_DIR,
+        )
+        eval_payload["visualization_files"] = visualization_files
     _write_pipeline_outputs(run_output_dir, eval_payload, error_analysis)
     _write_pipeline_outputs(OUTPUT_DIR, eval_payload, error_analysis)
 
@@ -140,8 +143,15 @@ def run_pipeline(verbose: bool = False) -> Dict[str, object]:
     }
 
 
+def _parse_pipeline_args(args: List[str]) -> tuple[bool, bool]:
+    verbose = "--quiet" not in args
+    plot = "--plot" in args
+    return verbose, plot
+
+
 if __name__ == "__main__":
-    result = run_pipeline(verbose=True)
+    verbose, plot = _parse_pipeline_args(sys.argv[1:])
+    result = run_pipeline(verbose=verbose, plot=plot)
     eval_metrics = cast(Dict[str, Any], cast(Dict[str, Any], result["eval_results"])["metrics"])
     print(
         "Pipeline complete | "

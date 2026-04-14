@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from pathlib import Path
 from typing import Dict, List
+
+from src.visualize import render_error_analysis_visualizations, render_evaluation_visualizations
 
 
 def analyze_errors(tickets: List[Dict[str, str]], predictions: List[Dict[str, object]]) -> Dict[str, object]:
@@ -71,3 +74,17 @@ def analyze_errors(tickets: List[Dict[str, str]], predictions: List[Dict[str, ob
 		"flag_frequency": dict(Counter(flag for flags in flagged_tickets.values() for flag in flags)),
 		"error_examples": examples[:20],
 	}
+
+
+def render_pipeline_visualizations(
+	tickets: List[Dict[str, str]],
+	predictions: List[Dict[str, object]],
+	metrics: Dict[str, object],
+	error_analysis: Dict[str, object],
+	output_dir: Path,
+) -> List[str]:
+	files = render_evaluation_visualizations(tickets, predictions, metrics, output_dir)
+	files.extend(render_error_analysis_visualizations(error_analysis, output_dir))
+	return files
+
+
