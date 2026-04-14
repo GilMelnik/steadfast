@@ -4,51 +4,10 @@ from __future__ import annotations
 
 import csv
 import math
-import re
 from pathlib import Path
 from typing import Dict, List, Set
 
-STOPWORDS = {
-	"a",
-	"an",
-	"and",
-	"are",
-	"as",
-	"at",
-	"be",
-	"by",
-	"for",
-	"from",
-	"has",
-	"have",
-	"in",
-	"is",
-	"it",
-	"of",
-	"on",
-	"or",
-	"that",
-	"the",
-	"this",
-	"to",
-	"we",
-	"with",
-}
-
-
-def normalize_whitespace(text: str) -> str:
-	return re.sub(r"\s+", " ", text).strip()
-
-
-def normalize_text(text: str) -> str:
-	cleaned = text.lower().replace("\u2019", "'").replace("\u2014", "-")
-	cleaned = re.sub(r"[^a-z0-9\s\-_/]", " ", cleaned)
-	return normalize_whitespace(cleaned)
-
-
-def tokenize(text: str) -> Set[str]:
-	tokens = {tok for tok in normalize_text(text).split(" ") if tok and tok not in STOPWORDS}
-	return {tok for tok in tokens if len(tok) > 2 or tok.isdigit()}
+from utils import normalize_text, normalize_whitespace, tokenize
 
 
 def load_knowledge_base(kb_path: Path) -> List[Dict[str, str]]:

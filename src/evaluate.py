@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from typing import Dict, List
 
-from src.preprocess import tokenize
+from utils import tokenize
 from src.utils import coerce_non_negative_float, coerce_non_negative_int
 
 PARTIAL_CATEGORY_MATCHES = {

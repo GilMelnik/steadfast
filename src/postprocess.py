@@ -4,79 +4,18 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from src.preprocess import normalize_text
-from utils import _contains_any_phrase
+from src.classification_cues import (
+	CONFIRMED_SECURITY_CUES,
+	DATA_LOSS_CUES,
+	HIGH_PRIORITY_CUES,
+	LOW_PRIORITY_CUES,
+	MEDIUM_PRIORITY_CUES,
+	PREVENTIVE_SECURITY_CUES,
+)
+from utils import normalize_text
+from src.utils import _contains_any_phrase
 
 PRIORITIES = ["low", "medium", "high", "critical"]
-LOW_PRIORITY_CUES = {
-	"how to",
-	"help us understand",
-	"interested in learning more",
-	"what happens",
-	"is there a way",
-	"request for",
-	"would love",
-	"calendar view",
-	"new team",
-	"first time",
-	"migrate",
-	"migration",
-	"pricing",
-	"guest option",
-}
-MEDIUM_CAP_CUES = {
-	"intermittent",
-	"sometimes",
-	"other sections work fine",
-	"blank page",
-	"walk me through",
-	"set up",
-	"setup",
-	"enable",
-	"provisioning",
-	"billing section",
-	"billing page",
-	"not saving",
-	"not flowing down",
-}
-HIGH_IMPACT_CUES = {
-	"stopped syncing",
-	"duplicate charges",
-	"error loading data",
-	"laggy",
-	"freezes",
-	"429",
-	"rate limited",
-	"auth error",
-	"unsynced",
-	"all the widgets",
-	"workflow",
-	"blocking",
-}
-DATA_LOSS_CUES = {
-	"data loss",
-	"files are gone",
-	"disappearing",
-	"vanishing",
-	"attachment count on the task drops to zero",
-}
-CONFIRMED_SECURITY_CUES = {
-	"session i don't recognize",
-	"session i dont recognize",
-	"session i do not recognize",
-	"unauthorized access",
-	"accessed from san francisco",
-	"compromised",
-	"unrecognized session",
-}
-PREVENTIVE_SECURITY_CUES = {
-	"want to make sure",
-	"can you confirm",
-	"concerned about",
-	"employee departure",
-	"left the company",
-	"bad terms",
-}
 
 def _escalate_priority(current_priority: str) -> str:
 	if current_priority not in PRIORITIES:
@@ -110,8 +49,8 @@ def apply_heuristics(
 
 	has_data_loss = _contains_any_phrase(text, DATA_LOSS_CUES)
 	has_confirmed_security_issue = _contains_any_phrase(text, CONFIRMED_SECURITY_CUES)
-	has_high_impact = _contains_any_phrase(text, HIGH_IMPACT_CUES)
-	has_medium_cap_signal = _contains_any_phrase(text, MEDIUM_CAP_CUES)
+	has_high_impact = _contains_any_phrase(text, HIGH_PRIORITY_CUES)
+	has_medium_cap_signal = _contains_any_phrase(text, MEDIUM_PRIORITY_CUES)
 	has_low_signal = _contains_any_phrase(text, LOW_PRIORITY_CUES)
 
 	if has_data_loss or has_confirmed_security_issue:
