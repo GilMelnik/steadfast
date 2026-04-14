@@ -24,5 +24,4 @@ def apply_heuristics(
 	ticket: Dict[str, str],
 	prediction: Dict[str, object],
 ) -> Dict[str, object]:
-	prediction["priority"] = _deescalate_priority(prediction["priority"])
 	return prediction

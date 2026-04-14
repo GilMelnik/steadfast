@@ -57,7 +57,7 @@ def _get_llm_config() -> Dict[str, str]:
 	}
 
 
-def _make_llm_messages(ticket: Dict[str, str], context_examples: List[Dict[str, object]]) -> List[Dict[str, str]]:
+def _make_llm_message(ticket: Dict[str, str], context_examples: List[Dict[str, object]]) -> Dict[str, str]:
 	context_lines: List[str] = []
 	for example in context_examples[:4]:
 		context_lines.append(
@@ -75,29 +75,27 @@ def _make_llm_messages(ticket: Dict[str, str], context_examples: List[Dict[str, 
 	allowed_categories = ", ".join(sorted(ALLOWED_CATEGORIES))
 	allowed_priorities = ", ".join(sorted(ALLOWED_PRIORITIES))
 
-	system_prompt = (
-		"You are a Steadfast support triage assistant. "
-		"Use the provided KB context to classify the ticket and draft a grounded, actionable response. "
-		"Return strict JSON only with keys: category, priority, response, confidence, flags. "
-		f"category must be one of [{allowed_categories}]. "
-		f"priority must be one of [{allowed_priorities}]. "
-		"confidence must be a number between 0 and 1. flags must be an array of strings."
-	)
-
-	user_prompt = (
+	message = (
+		"You are a Steadfast support triage assistant.\n"
+		"Classify the ticket and draft an initial customer response using the retrieved historical examples as grounding.\n"
+		"Steadfast has product-specific features, internal terminology, known issues, and workarounds that the model should infer from those examples.\n"
+		"Use that context explicitly when it is relevant. Avoid generic responses that could apply to any SaaS product.\n"
+		"Return strict JSON only with keys: category, priority, response, confidence, flags.\n"
+		f"category must be one of [{allowed_categories}].\n"
+		f"priority must be one of [{allowed_priorities}].\n"
+		"confidence must be a number between 0 and 1. flags must be an array of strings.\n\n"
 		f"Ticket ID: {ticket.get('ticket_id', '')}\n"
 		f"Customer: {ticket.get('customer_name', '')}\n"
 		f"Plan: {ticket.get('plan', '')}\n"
 		f"Subject: {ticket.get('subject', '')}\n"
 		f"Body: {ticket.get('body', '')}\n\n"
 		"Nearest knowledge base examples:\n"
-		+ "\n".join(context_lines)
 	)
-
-	return [
-		{"role": "user", "content": system_prompt},
-		{"role": "user", "content": user_prompt},
-	]
+	if context_lines:
+		message += "\n".join(context_lines)
+	else:
+		message += "(none)"
+	return {"role": "user", "content": message}
 
 
 def _extract_json_payload(raw_text: str) -> Optional[Dict[str, object]]:
@@ -129,12 +127,12 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 	except ImportError:
 		return None, "llm_skipped_missing_openai_dependency"
 
-	messages = _make_llm_messages(ticket, context_examples)
+	message = _make_llm_message(ticket, context_examples)
 	try:
 		client = OpenAI(api_key=config["api_key"], base_url=config["base_url"])
 		response = client.chat.completions.create(
 			model=config["model"],
-			messages=cast(Any, messages),
+			messages=cast(Any, [message]),
 			temperature=0.1,
 		)
 	except Exception as e:
