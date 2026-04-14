@@ -1,0 +1,139 @@
+"""Shared classification and post-processing phrase cues."""
+
+from __future__ import annotations
+
+LOW_PRIORITY_CUES = {
+	"feature request",
+	"how to",
+	"help us understand",
+	"interested in learning more",
+	"is there a way",
+	"what happens",
+	"would love",
+	"could you help",
+	"new team",
+	"new customer",
+	"calendar view",
+	"pricing",
+	"guest option",
+	"request for",
+	"first time",
+	"migrate",
+	"migration",
+}
+
+MEDIUM_PRIORITY_CUES = {
+	"intermittent",
+	"sometimes",
+	"other sections work fine",
+	"blank page",
+	"walk me through",
+	"set up",
+	"setup",
+	"enable",
+	"provisioning",
+	"billing section",
+	"billing page",
+	"not saving",
+	"not flowing down",
+	"stale numbers",
+}
+
+HIGH_PRIORITY_CUES = {
+	"stopped syncing",
+	"auth error",
+	"duplicate charges",
+	"error loading data",
+	"laggy",
+	"freezes",
+	"team affected",
+	"blocking",
+	"cannot access",
+	"can't access",
+	"unable to",
+	"rate limited",
+	"429",
+	"unsynced",
+	"all the widgets",
+	"workflow",
+}
+
+CRITICAL_PRIORITY_CUES = {
+	"data loss",
+	"files are gone",
+	"disappearing",
+	"vanishing",
+	"session i don't recognize",
+	"session i dont recognize",
+	"session i do not recognize",
+	"unauthorized access",
+	"compromised",
+	"504",
+	"redirect loop",
+	"attachment count on the task drops to zero",
+}
+
+NON_ESCALATION_CUES = {
+	"next week",
+	"conference",
+	"learning more",
+	"first time",
+	"question",
+	"would like",
+	"request",
+	"planning",
+	"evaluating whether to continue",
+}
+
+DATA_LOSS_CUES = {
+	"data loss",
+	"files are gone",
+	"disappearing",
+	"vanishing",
+	"attachment count on the task drops to zero",
+}
+
+CONFIRMED_SECURITY_CUES = {
+	"session i don't recognize",
+	"session i dont recognize",
+	"session i do not recognize",
+	"unauthorized access",
+	"accessed from san francisco",
+	"compromised",
+	"unrecognized session",
+}
+
+PREVENTIVE_SECURITY_CUES = {
+	"want to make sure",
+	"can you confirm",
+	"concerned about",
+	"employee departure",
+	"left the company",
+	"bad terms",
+}
+STOPWORDS = {
+	"a",
+	"an",
+	"and",
+	"are",
+	"as",
+	"at",
+	"be",
+	"by",
+	"for",
+	"from",
+	"has",
+	"have",
+	"in",
+	"is",
+	"it",
+	"of",
+	"on",
+	"or",
+	"that",
+	"the",
+	"this",
+	"to",
+	"we",
+	"with",
+}
