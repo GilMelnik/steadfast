@@ -19,3 +19,7 @@ def coerce_non_negative_float(value: object) -> float:
 	except (TypeError, ValueError):
 		return 0.0
 	return max(parsed, 0.0)
+
+
+def _contains_any_phrase(text: str, phrases: set[str]) -> bool:
+	return any(phrase in text for phrase in phrases)

@@ -10,6 +10,7 @@ from difflib import SequenceMatcher
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from src.preprocess import normalize_text, tokenize
+from src.utils import _contains_any_phrase
 
 ALLOWED_CATEGORIES = {
 	"billing",
@@ -39,6 +40,78 @@ PRIORITY_HINTS = {
 	"high": {"asap", "important", "blocking", "cannot", "team affected", "stopped"},
 	"medium": {"inconsistent", "intermittent", "confusing", "question", "today"},
 	"low": {"not urgent", "whenever", "nice to have", "would like", "quick question"},
+}
+
+LOW_PRIORITY_CUES = {
+	"feature request",
+	"how to",
+	"help us understand",
+	"interested in learning more",
+	"is there a way",
+	"what happens",
+	"would love",
+	"could you help",
+	"new team",
+	"new customer",
+	"calendar view",
+	"pricing",
+	"guest option",
+}
+
+MEDIUM_PRIORITY_CUES = {
+	"intermittent",
+	"sometimes",
+	"other sections work fine",
+	"blank page",
+	"walk me through",
+	"set up",
+	"setup",
+	"enable",
+	"provisioning",
+	"not saving",
+	"not flowing down",
+	"stale numbers",
+}
+
+HIGH_PRIORITY_CUES = {
+	"stopped syncing",
+	"auth error",
+	"duplicate charges",
+	"error loading data",
+	"laggy",
+	"freezes",
+	"team affected",
+	"blocking",
+	"cannot access",
+	"can't access",
+	"unable to",
+	"rate limited",
+}
+
+CRITICAL_PRIORITY_CUES = {
+	"data loss",
+	"files are gone",
+	"disappearing",
+	"vanishing",
+	"session i don't recognize",
+	"session i dont recognize",
+	"session i do not recognize",
+	"unauthorized access",
+	"compromised",
+	"504",
+	"redirect loop",
+}
+
+NON_ESCALATION_CUES = {
+	"next week",
+	"conference",
+	"learning more",
+	"first time",
+	"question",
+	"would like",
+	"request",
+	"planning",
+	"evaluating whether to continue",
 }
 
 DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
@@ -83,6 +156,13 @@ def _make_llm_message(ticket: Dict[str, str], context_examples: List[Dict[str, o
 		"Return strict JSON only with keys: category, priority, response, confidence, flags.\n"
 		f"category must be one of [{allowed_categories}].\n"
 		f"priority must be one of [{allowed_priorities}].\n"
+		"Priority rubric:\n"
+		"- low: routine how-to, onboarding, planning, migration, pricing, feature requests, non-blocking UX issues.\n"
+		"- medium: limited-scope bugs or admin tasks, intermittent issues, one page/feature impacted, setup/configuration work.\n"
+		"- high: blocking workflow issues, confirmed product failures with meaningful business impact, urgent billing problems, security concerns needing prompt review.\n"
+		"- critical: confirmed data loss, confirmed unauthorized access, hard login outage for multiple users, or severe production failures such as 504s on core workflows.\n"
+		"Do not raise priority just because the customer says urgent, has a deadline, is an enterprise account, or asks several questions.\n"
+		"When severity is ambiguous, choose the lower of the plausible priorities.\n"
 		"confidence must be a number between 0 and 1. flags must be an array of strings.\n\n"
 		f"Ticket ID: {ticket.get('ticket_id', '')}\n"
 		f"Customer: {ticket.get('customer_name', '')}\n"
@@ -418,7 +498,7 @@ def _guess_category(ticket_text: str, context_examples: List[Dict[str, object]])
 	return best_category if best_category in ALLOWED_CATEGORIES else "unknown"
 
 
-def _guess_priority(ticket_text: str, context_examples: List[Dict[str, object]]) -> str:
+def _guess_priority(ticket_text: str, category: str, context_examples: List[Dict[str, object]]) -> str:
 	priority_scores: Dict[str, float] = defaultdict(float)
 	normalized_text = normalize_text(ticket_text)
 
@@ -427,9 +507,41 @@ def _guess_priority(ticket_text: str, context_examples: List[Dict[str, object]])
 			if hint in normalized_text:
 				priority_scores[priority] += 1.2
 
+	if _contains_any_phrase(normalized_text, LOW_PRIORITY_CUES):
+		priority_scores["low"] += 2.0
+	if _contains_any_phrase(normalized_text, MEDIUM_PRIORITY_CUES):
+		priority_scores["medium"] += 1.8
+	if _contains_any_phrase(normalized_text, HIGH_PRIORITY_CUES):
+		priority_scores["high"] += 2.4
+	if _contains_any_phrase(normalized_text, CRITICAL_PRIORITY_CUES):
+		priority_scores["critical"] += 4.0
+	if _contains_any_phrase(normalized_text, NON_ESCALATION_CUES):
+		priority_scores["low"] += 1.0
+		priority_scores["medium"] += 0.5
+		priority_scores["high"] -= 0.8
+		priority_scores["critical"] -= 1.2
+
 	for idx, ex in enumerate(context_examples):
 		decay = 1.0 / (idx + 1)
-		priority_scores[str(ex["priority"])] += 1.6 * decay
+		priority_scores[str(ex["priority"])] += 1.1 * decay
+
+	if category in {"feature_request", "onboarding"} and not _contains_any_phrase(normalized_text, HIGH_PRIORITY_CUES.union(CRITICAL_PRIORITY_CUES)):
+		priority_scores["low"] += 2.5
+	if category in {"billing", "account", "integration"} and _contains_any_phrase(
+		normalized_text,
+		{"set up", "setup", "enable", "walk me through", "learning more", "guest option", "what happens"},
+	):
+		priority_scores["medium"] += 1.3
+		priority_scores["high"] -= 0.7
+	if category == "security" and _contains_any_phrase(
+		normalized_text,
+		{"want to make sure", "can you confirm", "employee departure", "left the company"},
+	) and not _contains_any_phrase(normalized_text, {"session i don't recognize", "session i dont recognize", "session i do not recognize", "unauthorized access", "compromised"}):
+		priority_scores["high"] += 1.1
+		priority_scores["critical"] -= 1.5
+	if _contains_any_phrase(normalized_text, {"intermittent", "sometimes", "other sections work fine"}):
+		priority_scores["medium"] += 1.2
+		priority_scores["high"] -= 0.6
 
 	if "critical" in priority_scores and priority_scores["critical"] >= 2:
 		return "critical"
@@ -481,7 +593,7 @@ def _classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dic
 	ticket_text = " ".join((ticket.get("subject", ""), ticket.get("body", "")))
 
 	category = _guess_category(ticket_text, context_examples)
-	priority = _guess_priority(ticket_text, context_examples)
+	priority = _guess_priority(ticket_text, category, context_examples)
 	response = _build_grounded_response(ticket, category, context_examples)
 
 	confidence = 0.45 + 0.1 * min(len(context_examples), 4)
