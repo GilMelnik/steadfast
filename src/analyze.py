@@ -68,6 +68,12 @@ def analyze_errors(tickets: List[Dict[str, str]], predictions: List[Dict[str, ob
             {"expected": e, "predicted": p, "count": c}
             for (e, p), c in priority_confusions.most_common(10)
         ],
-        "flag_frequency": dict(Counter(flag for flags in flagged_tickets.values() for flag in flags)),
+        "flag_frequency": {
+            flag: count
+            for flag, count in Counter(
+                flag for flags in flagged_tickets.values() for flag in flags
+            ).items()
+            if count >= 3
+        },
         "error_examples": examples[:20],
     }
