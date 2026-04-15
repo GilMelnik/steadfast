@@ -168,6 +168,6 @@ def split_csv(
 if __name__ == "__main__":
     split_csv(
         input_file="data/knowledge_base.csv",
-        num_samples=50,
+        num_samples=35,
         stratify_columns=["category", "priority"],
     )

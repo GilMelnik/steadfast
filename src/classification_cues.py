@@ -85,24 +85,6 @@ NON_ESCALATION_CUES = {
 	"evaluating whether to continue",
 }
 
-DATA_LOSS_CUES = {
-	"data loss",
-	"files are gone",
-	"disappearing",
-	"vanishing",
-	"attachment count on the task drops to zero",
-}
-
-CONFIRMED_SECURITY_CUES = {
-	"session i don't recognize",
-	"session i dont recognize",
-	"session i do not recognize",
-	"unauthorized access",
-	"accessed from san francisco",
-	"compromised",
-	"unrecognized session",
-}
-
 PREVENTIVE_SECURITY_CUES = {
 	"want to make sure",
 	"can you confirm",
