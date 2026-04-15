@@ -1,0 +1,452 @@
+[
+  {
+    "ticket_id": "TK-0751",
+    "customer_name": "ClearEdge Financial",
+    "plan": "Enterprise",
+    "subject": "Automated reports sending to wrong recipients",
+    "body": "Our scheduled weekly report that should go to the management team (distribution list: mgmt@ClearEdge Financial) is being sent to individual contributors instead. We noticed this started after we updated our team structure last week. Some sensitive data may have been exposed to the wrong people.",
+    "expected_category": "bug",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0027",
+    "customer_name": "Aegis Compliance",
+    "plan": "Starter",
+    "subject": "How to import data from our old project management tool",
+    "body": "We're migrating from Asana to Steadfast. We have about 2,000 tasks across 15 projects that need to come over. Is there an import tool? We also need to preserve assignees, due dates, and custom fields if possible. What format does the import expect?",
+    "expected_category": "onboarding",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0153",
+    "customer_name": "Meridian SaaS Group",
+    "plan": "Growth",
+    "subject": "Question about data retention after downgrade",
+    "body": "We're considering downgrading from Enterprise to Growth. What happens to our data? Specifically: archived projects, custom fields, and integration configurations. Will we lose anything? Need to understand the full impact before making a decision.",
+    "expected_category": "account",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0160",
+    "customer_name": "NovaTech Solutions",
+    "plan": "Starter",
+    "subject": "Cancellation and final billing inquiry",
+    "body": "We've decided to move to a different platform. Please process our cancellation effective end of this billing cycle. Also need confirmation of what our final invoice will look like \u2014 we don't want any surprise charges after cancellation.",
+    "expected_category": "billing",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0067",
+    "customer_name": "Luminos AI",
+    "plan": "Growth",
+    "subject": "Need to enable IP allowlisting for our account",
+    "body": "Our security team requires that we restrict access to Steadfast from specific IP ranges only. We need to allowlist our office IPs and VPN ranges. Is this possible? If so, how do we configure it? This is a requirement for our security compliance.",
+    "expected_category": "security",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0167",
+    "customer_name": "Blueshift Labs",
+    "plan": "Enterprise",
+    "subject": "Discount code not applying at checkout",
+    "body": "Trying to apply the promo code GROW2024 that your sales rep gave us, but it says 'invalid code' at checkout. We were promised 20% off the first year. Can you apply this manually? We want to complete our upgrade today.",
+    "expected_category": "billing",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0245",
+    "customer_name": "Foxglove Logistics",
+    "plan": "Enterprise",
+    "subject": "API response times have doubled in the last week",
+    "body": "Our API integration is experiencing significant latency increases. Average response time went from ~200ms to ~500ms across all endpoints. This is impacting our real-time sync. We haven't changed anything on our end. Is there a platform-wide performance issue?",
+    "expected_category": "performance",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0487",
+    "customer_name": "Skyward Freight",
+    "plan": "Enterprise",
+    "subject": "Critical integration failure disrupting our supply chain",
+    "body": "Our Steadfast-to-SAP integration that drives our supply chain scheduling has been failing for the past 4 hours. Every minute this is down, we're accumulating delays in manufacturing orders. We're an Enterprise customer with an SLA and this is a P1 issue for us. Need someone on this NOW.",
+    "expected_category": "integration",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0640",
+    "customer_name": "Redwood Pharma",
+    "plan": "Starter",
+    "subject": "Slack notifications not posting to the right channel",
+    "body": "We configured Slack notifications to post to #ops-alerts but they're going to #general instead. We've reconfigured it twice and it reverts each time. This is causing noise in our general channel and our ops team is missing critical alerts.",
+    "expected_category": "integration",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0124",
+    "customer_name": "Silverlake Insurance",
+    "plan": "Starter",
+    "subject": "Transfer account ownership to new admin",
+    "body": "Our previous IT admin (jordan.smith@Silverlake Insurance) has left the company. I'm the new admin and need full ownership transferred to me (alex.chen@Silverlake Insurance). Jordan's account should be deactivated. What documentation do you need for this?",
+    "expected_category": "account",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0199",
+    "customer_name": "Delta Compliance",
+    "plan": "Growth",
+    "subject": "File upload silently fails for files over 10MB",
+    "body": "Trying to upload customer contracts (PDF, typically 15-25MB) and the upload appears to complete but the file never shows up in the document list. No error message. Smaller files under 10MB upload fine. We've tried multiple file types. Delta Compliance needs this for our document management workflow.",
+    "expected_category": "bug",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0440",
+    "customer_name": "Apex Retail Group",
+    "plan": "Enterprise",
+    "subject": "Team members can't see shared projects after joining",
+    "body": "I've invited several new team members but they're saying they can't see any of the shared projects. I've added them to the team but projects aren't showing up. What am I missing? Do I need to add them to each project individually?",
+    "expected_category": "onboarding",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0768",
+    "customer_name": "Orbis Manufacturing",
+    "plan": "Growth",
+    "subject": "Need to add 15 new team members",
+    "body": "We're onboarding a new department and need to add 15 users to our account. Can you walk me through the bulk user creation process? Also, what permission groups should I set up? We want them to have access to projects but not billing or admin settings.",
+    "expected_category": "account",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0792",
+    "customer_name": "Catalyst Robotics",
+    "plan": "Starter",
+    "subject": "What is Smart Routing and how do I enable it?",
+    "body": "I saw a mention of 'Smart Routing' in your changelog but I can't find it anywhere in our workspace settings. What does it do exactly? Is it available on the Starter plan? We're a small team (10 people) and manually assigning tasks is taking up a lot of my time as the team lead.",
+    "expected_category": "onboarding",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0740",
+    "customer_name": "Palladium Ventures",
+    "plan": "Enterprise",
+    "subject": "Need information about our SLA terms",
+    "body": "We're doing an internal review of all our vendor SLAs and need detailed information about our current SLA with Steadfast. Specifically: uptime guarantees, response time commitments, penalty clauses for SLA breaches, and the escalation process. Can you send us the full SLA document?",
+    "expected_category": "account",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0755",
+    "customer_name": "Blackstone Ops",
+    "plan": "Growth",
+    "subject": "Slack notifications not posting to the right channel",
+    "body": "We configured Slack notifications to post to #ops-alerts but they're going to #general instead. We've reconfigured it twice and it reverts each time. This is causing noise in our general channel and our ops team is missing critical alerts.",
+    "expected_category": "integration",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0015",
+    "customer_name": "BrightPath Analytics",
+    "plan": "Growth",
+    "subject": "Google Calendar integration showing duplicate events",
+    "body": "Every meeting scheduled in Steadfast is creating two events in Google Calendar. It's been happening for about a week. Deleting one copy deletes both. Our team's calendars are a mess with all these duplicates. We have 50+ meetings a week so this is a significant problem.",
+    "expected_category": "integration",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0419",
+    "customer_name": "Ember Analytics",
+    "plan": "Enterprise",
+    "subject": "Search is unusably slow with large datasets",
+    "body": "Global search across our workspace takes 15-20 seconds to return results. We have about 100,000 records. The search used to be instant when we had fewer records. At this point it's faster to manually browse than to search. Is there a way to speed this up?",
+    "expected_category": "performance",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0442",
+    "customer_name": "Mosaic Creative",
+    "plan": "Growth",
+    "subject": "Would be great to have recurring tasks",
+    "body": "We have many tasks that repeat on a weekly or monthly basis \u2014 status reports, server checks, client check-ins. Right now we manually create these each time. A recurring task feature with customizable schedules would save us significant time.",
+    "expected_category": "feature_request",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0451",
+    "customer_name": "Verdant Agriculture",
+    "plan": "Growth",
+    "subject": "Confused about workspace vs project structure",
+    "body": "I'm trying to organize our company in Steadfast but I'm confused about the hierarchy. What's the difference between a workspace, a space, and a project? We have 4 departments each with multiple teams. How should I structure this? Don't want to set it up wrong and have to redo everything.",
+    "expected_category": "onboarding",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0195",
+    "customer_name": "Helix Biotech",
+    "plan": "Enterprise",
+    "subject": "Email notifications arriving with wrong timestamps",
+    "body": "All our email notifications from Steadfast show timestamps that are 5 hours ahead. We're in EST but the emails show times in what looks like UTC. This started happening about two weeks ago. Our team is getting confused about when events actually occurred.",
+    "expected_category": "bug",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0277",
+    "customer_name": "Pinecrest Health",
+    "plan": "Starter",
+    "subject": "Can't drag and drop tasks in board view",
+    "body": "The kanban board view doesn't allow drag and drop anymore. When I try to move a task to a different column, it snaps back to its original position. This works in list view (I can change status there) but the board interaction is broken. Really frustrating.",
+    "expected_category": "bug",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0366",
+    "customer_name": "Frostbyte Gaming",
+    "plan": "Growth",
+    "subject": "Two-factor auth codes not being sent",
+    "body": "Several of our users are not receiving their 2FA codes via SMS when trying to log in. We've verified the phone numbers are correct. This has been happening intermittently for the past 3 days. Some users are completely locked out.",
+    "expected_category": "bug",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0538",
+    "customer_name": "Aegis Compliance",
+    "plan": "Starter",
+    "subject": "Can't drag and drop tasks in board view",
+    "body": "The kanban board view doesn't allow drag and drop anymore. When I try to move a task to a different column, it snaps back to its original position. This works in list view (I can change status there) but the board interaction is broken. Really frustrating.",
+    "expected_category": "bug",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0203",
+    "customer_name": "Primewave Telecom",
+    "plan": "Starter",
+    "subject": "Data encryption at rest question",
+    "body": "For our SOC 2 compliance audit, we need documentation of how Steadfast encrypts data at rest. Specifically: encryption algorithm, key management process, and whether we can bring our own encryption keys (BYOK). Our auditors need this within 2 weeks.",
+    "expected_category": "security",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0460",
+    "customer_name": "Beacon Analytics",
+    "plan": "Enterprise",
+    "subject": "API returning 500 error on POST /v2/tasks",
+    "body": "Our integration is getting consistent 500 Internal Server Error responses when calling POST /v2/tasks. The request body is valid JSON matching your API spec. Started about 2 hours ago. GET requests work fine. This is blocking our automated task creation pipeline.",
+    "expected_category": "bug",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0296",
+    "customer_name": "Oakcrest Partners",
+    "plan": "Starter",
+    "subject": "User permissions audit for compliance review",
+    "body": "We need to conduct a quarterly permissions audit. Is there a way to export a report showing all users, their roles, and what they have access to? We need this for both our internal audit and our upcoming ISO 27001 certification.",
+    "expected_category": "security",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0091",
+    "customer_name": "Cloudpeak Software",
+    "plan": "Growth",
+    "subject": "Account locked after too many login attempts",
+    "body": "My account got locked after entering the wrong password too many times (I recently changed it). I can't access the password reset because my email on file is my old work email. I need to get back in ASAP \u2014 I have a client presentation in 2 hours.",
+    "expected_category": "account",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0715",
+    "customer_name": "Ironpeak Systems",
+    "plan": "Enterprise",
+    "subject": "How do I change my notification preferences?",
+    "body": "Quick question \u2014 how do I adjust which email notifications I receive? I'm getting too many alerts for things that aren't relevant to me. I looked in settings but couldn't find the notification preferences page.",
+    "expected_category": "account",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0657",
+    "customer_name": "Helix Biotech",
+    "plan": "Starter",
+    "subject": "Need ability to bulk-assign tasks",
+    "body": "Currently I have to assign tasks one at a time. With 200+ tasks to reassign during our team restructure, this is extremely tedious. A bulk selection and assign feature would save us hours. Even a CSV import for assignments would work.",
+    "expected_category": "feature_request",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0288",
+    "customer_name": "Skyward Freight",
+    "plan": "Starter",
+    "subject": "Question about enterprise pricing tiers",
+    "body": "We're evaluating whether to upgrade from Growth to Enterprise. Can you send over the current Enterprise pricing structure? Specifically interested in volume discounts for 500+ seats and what's included in the Enterprise SLA. Thanks!",
+    "expected_category": "billing",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0010",
+    "customer_name": "Vanguard Financial",
+    "plan": "Starter",
+    "subject": "Calculated fields returning #ERROR",
+    "body": "Custom calculated fields in our project tracker are all showing #ERROR instead of values. These are simple formulas like SUM and AVERAGE across numeric columns. They were working fine until this morning. Affects all projects, not just one.",
+    "expected_category": "bug",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0215",
+    "customer_name": "Oakcrest Partners",
+    "plan": "Starter",
+    "subject": "Dashboard takes 45+ seconds to load",
+    "body": "Our main dashboard has become extremely slow. It's taking over 45 seconds to load, sometimes timing out completely. This started about a week ago. We have a lot of data (50,000+ tasks, 200 users) but it was fine before. Is something wrong on your end?",
+    "expected_category": "performance",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0677",
+    "customer_name": "Tidewater Shipping",
+    "plan": "Starter",
+    "subject": "Need help setting up Jira two-way sync",
+    "body": "We want to set up a two-way sync between Steadfast tasks and Jira issues. Specifically: when a task is created in Steadfast with the 'engineering' tag, it should create a Jira issue, and status changes should sync both ways. What's the best approach?",
+    "expected_category": "integration",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0248",
+    "customer_name": "Sapphire Data",
+    "plan": "Enterprise",
+    "subject": "Can we get a breakdown of our usage statistics?",
+    "body": "For our quarterly vendor review, we need detailed usage statistics for our Steadfast account: active users, tasks created, projects active, storage used, API call volume. Is there a dashboard or report for this?",
+    "expected_category": "account",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0268",
+    "customer_name": "Beacon Analytics",
+    "plan": "Starter",
+    "subject": "How to import data from our old project management tool",
+    "body": "We're migrating from Asana to Steadfast. We have about 2,000 tasks across 15 projects that need to come over. Is there an import tool? We also need to preserve assignees, due dates, and custom fields if possible. What format does the import expect?",
+    "expected_category": "onboarding",
+    "expected_priority": "low"
+  },
+  {
+    "ticket_id": "TK-0120",
+    "customer_name": "Aurora Creative",
+    "plan": "Growth",
+    "subject": "Zapier trigger not firing for new tasks",
+    "body": "We have a Zapier automation that should trigger when a new task is created in Steadfast. It worked initially but stopped firing about a month ago. Our Zap history shows no triggers. The Zap is turned on and connected. Other Zaps (not connected to Steadfast) work fine.",
+    "expected_category": "integration",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0048",
+    "customer_name": "Keystone Education",
+    "plan": "Enterprise",
+    "subject": "How to set up project templates",
+    "body": "We run similar projects repeatedly and want to create templates so we don't have to set up tasks, milestones, and team assignments from scratch each time. How do I create and use project templates?",
+    "expected_category": "account",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0516",
+    "customer_name": "Aurora Creative",
+    "plan": "Enterprise",
+    "subject": "Need to export our project data for a board meeting",
+    "body": "I need to export a comprehensive project status report for our board of directors meeting next Friday. Need it as a PDF with charts showing progress, timeline, and budget utilization. Is there a built-in way to do this?",
+    "expected_category": "account",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0314",
+    "customer_name": "Cobalt Learning",
+    "plan": "Growth",
+    "subject": "Tax exemption certificate not being applied",
+    "body": "We submitted our tax exemption certificate three months ago but our invoices still show sales tax. We're a registered nonprofit and shouldn't be charged tax. This has been an ongoing issue. Can you escalate this?",
+    "expected_category": "billing",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0115",
+    "customer_name": "Ironpeak Systems",
+    "plan": "Starter",
+    "subject": "Webhook payloads missing customer_id field",
+    "body": "Since your last update, the webhook payloads for 'invoice.paid' events no longer include the customer_id field. Our integration relies on this field to match payments to our internal records. This is breaking our automated reconciliation process.",
+    "expected_category": "bug",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0065",
+    "customer_name": "Ironclad Security",
+    "plan": "Growth",
+    "subject": "API rate limit too low for our use case",
+    "body": "We're hitting the 100 requests/minute API rate limit constantly. Our integration syncs data bidirectionally and needs at least 500 req/min during peak hours. We've already optimized our batching. Can the limit be raised or can we get a higher-tier API plan?",
+    "expected_category": "feature_request",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0474",
+    "customer_name": "Aegis Compliance",
+    "plan": "Enterprise",
+    "subject": "REST API returning 429 errors during peak hours",
+    "body": "We're getting 429 (Too Many Requests) errors from your API between 9-11 AM when our team is most active. We're making about 200 requests per minute across our integration services. The rate limit headers show a 100/min limit. This is blocking our automated workflows.",
+    "expected_category": "integration",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0636",
+    "customer_name": "Mosaic Creative",
+    "plan": "Growth",
+    "subject": "Zapier trigger not firing for new tasks",
+    "body": "We have a Zapier automation that should trigger when a new task is created in Steadfast. It worked initially but stopped firing about a month ago. Our Zap history shows no triggers. The Zap is turned on and connected. Other Zaps (not connected to Steadfast) work fine.",
+    "expected_category": "integration",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0772",
+    "customer_name": "Sapphire Data",
+    "plan": "Growth",
+    "subject": "Discount code not applying at checkout",
+    "body": "Trying to apply the promo code GROW2024 that your sales rep gave us, but it says 'invalid code' at checkout. We were promised 20% off the first year. Can you apply this manually? We want to complete our upgrade today.",
+    "expected_category": "billing",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0515",
+    "customer_name": "Foxglove Logistics",
+    "plan": "Growth",
+    "subject": "Email alerts missing again \u2014 different issue this time",
+    "body": "Email notifications have stopped working AGAIN. Last time you said it was a SendGrid issue and it was fixed. But now it's back and it's different \u2014 we're receiving some notifications but not others. Specifically, task assignment emails work but comment notifications and due date reminders don't come through at all.",
+    "expected_category": "bug",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0594",
+    "customer_name": "TerraShift Engineering",
+    "plan": "Growth",
+    "subject": "Would be great to have recurring tasks",
+    "body": "We have many tasks that repeat on a weekly or monthly basis \u2014 status reports, server checks, client check-ins. Right now we manually create these each time. A recurring task feature with customizable schedules would save us significant time.",
+    "expected_category": "feature_request",
+    "expected_priority": "high"
+  },
+  {
+    "ticket_id": "TK-0021",
+    "customer_name": "Redwood Pharma",
+    "plan": "Starter",
+    "subject": "Can't export reports to PDF anymore",
+    "body": "The PDF export feature on the reports page stopped working about a week ago. When I click 'Export to PDF' nothing happens \u2014 no download, no error message. I've tried Chrome and Firefox. Other export formats (CSV, XLSX) work fine. This was working before.",
+    "expected_category": "bug",
+    "expected_priority": "critical"
+  },
+  {
+    "ticket_id": "TK-0745",
+    "customer_name": "Evergreen SaaS",
+    "plan": "Starter",
+    "subject": "Calculated fields returning #ERROR",
+    "body": "Custom calculated fields in our project tracker are all showing #ERROR instead of values. These are simple formulas like SUM and AVERAGE across numeric columns. They were working fine until this morning. Affects all projects, not just one.",
+    "expected_category": "bug",
+    "expected_priority": "medium"
+  },
+  {
+    "ticket_id": "TK-0204",
+    "customer_name": "ClearEdge Financial",
+    "plan": "Growth",
+    "subject": "API rate limit too low for our use case",
+    "body": "We're hitting the 100 requests/minute API rate limit constantly. Our integration syncs data bidirectionally and needs at least 500 req/min during peak hours. We've already optimized our batching. Can the limit be raised or can we get a higher-tier API plan?",
+    "expected_category": "feature_request",
+    "expected_priority": "high"
+  }
+]
