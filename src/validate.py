@@ -73,7 +73,11 @@ def validate_prediction(prediction: Dict[str, object]) -> Tuple[Dict[str, object
 	validated = {
 		"ticket_id": ticket_id,
 		"category": category,
+		"category_explanation": str(prediction.get("category_explanation", "")),
+		"category_confidence": prediction.get("category_confidence", 0.0),
 		"priority": priority,
+		"priority_explanation": str(prediction.get("priority_explanation", "")),
+		"priority_confidence": prediction.get("priority_confidence", 0.0),
 		"response": response,
 		"confidence": round(confidence, 3),
 		"flags": sorted(set(flags)),

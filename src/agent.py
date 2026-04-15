@@ -24,21 +24,21 @@ ALLOWED_CATEGORIES = {
 ALLOWED_PRIORITIES = {"low", "medium", "high", "critical"}
 
 CATEGORY_HINTS = {
-	"billing": {"invoice", "charged", "refund", "credit", "payment", "billing", "seat"},
-	"bug": {"broken", "error", "not working", "fails", "stale", "wrong", "issue", "bug"},
-	"feature_request": {"feature", "request", "would love", "wish", "add support", "ability"},
-	"account": {"account", "owner", "role", "permission", "users", "workspace", "deactivate"},
-	"integration": {"api", "webhook", "sso", "slack", "okta", "jira", "github", "sync"},
-	"onboarding": {"how to", "setup", "set up", "getting started", "guide", "best practices"},
-	"security": {"security", "mfa", "2fa", "suspicious", "breach", "allowlist", "compromised"},
-	"performance": {"slow", "lag", "timeout", "504", "performance", "sluggish", "latency"},
+	"billing": {"invoice", "charged", "refund", "credit", "payment", "billing", "seat", "tax", "address", "downgrade"},
+	"bug": {"broken", "error", "not working", "fails", "stale", "wrong", "issue", "bug", "glitch", "incorrect"},
+	"feature_request": {"feature", "request", "would love", "wish", "add support", "ability", "improvement", "suggestion"},
+	"account": {"account", "owner", "role", "permission", "users", "workspace", "deactivate", "export", "transfer", "ownership", "profile"},
+	"integration": {"api", "webhook", "sso", "slack", "okta", "jira", "github", "sync", "connection", "token"},
+	"onboarding": {"how to", "setup", "set up", "getting started", "guide", "best practices", "migration", "import", "first time", "onboard"},
+	"security": {"security", "mfa", "2fa", "suspicious", "breach", "allowlist", "compromised", "unauthorized", "compliance", "audit", "rbac"},
+	"performance": {"slow", "lag", "timeout", "504", "performance", "sluggish", "latency", "freezes", "loading"},
 }
 
 PRIORITY_HINTS = {
-	"critical": {"urgent", "production down", "can't log in", "data loss", "security", "504"},
-	"high": {"asap", "important", "blocking", "cannot", "team affected", "stopped"},
-	"medium": {"inconsistent", "intermittent", "confusing", "question", "today"},
-	"low": {"not urgent", "whenever", "nice to have", "would like", "quick question"},
+	"critical": {"urgent", "production down", "can't log in", "data loss", "security", "504", "board meeting", "immediate", "now", "breach"},
+	"high": {"asap", "important", "blocking", "cannot", "team affected", "stopped", "enterprise", "migration", "ownership", "admin", "today", "deadline"},
+	"medium": {"inconsistent", "intermittent", "confusing", "question", "workaround", "glitch", "minor"},
+	"low": {"not urgent", "whenever", "nice to have", "would like", "quick question", "future", "cosmetic"},
 }
 
 DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
@@ -75,33 +75,62 @@ def _make_llm_message(ticket: Dict[str, str], context_examples: List[Dict[str, o
 	allowed_categories = ", ".join(sorted(ALLOWED_CATEGORIES))
 	allowed_priorities = ", ".join(sorted(ALLOWED_PRIORITIES))
 
+	category_guidance = (
+		"- billing: Invoices, charges, refunds, payments, billing cycles, seats/licenses, plan changes/downgrades, and billing profile updates (address, tax info).\n"
+		"- bug: Broken features, errors, unexpected behavior, UI glitches, 'not working', or functional regressions.\n"
+		"- feature_request: Suggestions for new functionality, 'would love to see', missing features, or UI improvements.\n"
+		"- account: User management, roles, permissions, workspace settings, data exports, ownership transfers, and login issues (non-security).\n"
+		"- integration: API, webhooks, third-party apps (Slack, Jira, Github), SSO (Okta), and sync failures.\n"
+		"- onboarding: Setup help for new teams, 'how to' questions, best practices, getting started, and initial migrations from other tools.\n"
+		"- security: MFA/2FA, suspicious activity, data breaches, unauthorized access, allowlisting, and security compliance (RBAC, audits).\n"
+		"- performance: Slowness, lag, timeouts, high latency, 504 errors, and UI freezing."
+	)
+
+	priority_guidance = (
+		"- critical: Production down, data loss (including silent failures), security breach, total login failure, 504 errors, or business-critical deadlines (e.g., 'board meeting', 'immediate audit').\n"
+		"- high: Workflow-blocking issues where a user/team cannot proceed, major feature failures, sensitive administrative changes (ownership, billing), onboarding/migration for new teams, or issues affecting Enterprise account productivity.\n"
+		"- medium: Intermittent bugs, confusing behavior, feature requests with defined but non-urgent deadlines, or issues affecting single users with available workarounds.\n"
+		"- low: General 'how-to' questions, minor cosmetic issues, suggestions for future features, or 'nice to have' requests with no immediate urgency."
+	)
+
 	message = (
-		"You are a Steadfast support triage assistant.\n"
-		"Classify the ticket and draft an initial customer response using the retrieved historical examples as grounding.\n"
-		"Steadfast has product-specific features, internal terminology, known issues, and workarounds that the model should infer from those examples.\n"
-		"Use that context explicitly when it is relevant. Avoid generic responses that could apply to any SaaS product.\n"
-		"Return strict JSON only with keys: category, priority, response, confidence, flags.\n"
-		f"category must be one of [{allowed_categories}].\n"
-		f"priority must be one of [{allowed_priorities}].\n"
-		"Priority rubric:\n"
-		"- low: routine how-to, onboarding, planning, migration, pricing, feature requests, non-blocking UX issues.\n"
-		"- medium: limited-scope bugs or admin tasks, intermittent issues, one page/feature impacted, setup/configuration work.\n"
-		"- high: blocking workflow issues, confirmed product failures with meaningful business impact, urgent billing problems, security concerns needing prompt review.\n"
-		"- critical: confirmed data loss, confirmed unauthorized access, hard login outage for multiple users, or severe production failures such as 504s on core workflows.\n"
-		"Do not raise priority just because the customer says urgent, has a deadline, is an enterprise account, or asks several questions.\n"
-		"When severity is ambiguous, choose the lower of the plausible priorities.\n"
-		"confidence must be a number between 0 and 1. flags must be an array of strings.\n\n"
-		f"Ticket ID: {ticket.get('ticket_id', '')}\n"
-		f"Customer: {ticket.get('customer_name', '')}\n"
-		f"Plan: {ticket.get('plan', '')}\n"
-		f"Subject: {ticket.get('subject', '')}\n"
-		f"Body: {ticket.get('body', '')}\n\n"
+		"You are a senior Steadfast support triage assistant. Your goal is to accurately classify tickets and draft initial responses.\n\n"
+		"### Classification Guidelines\n"
+		"Categories:\n"
+		f"{category_guidance}\n\n"
+		"Priorities:\n"
+		f"{priority_guidance}\n\n"
+		"### Strategic Escalation Rules\n"
+		"1. **Enterprise Impact:** Issues affecting multiple users or core workflows on an Enterprise plan should be escalated to High or Critical.\n"
+		"2. **Onboarding/Migration:** Initial setup and data migrations are time-sensitive blockers for new customers; treat these as High priority.\n"
+		"3. **Sensitive Operations:** Ownership transfers, billing updates, and security configurations are high-stakes and should be High priority.\n"
+		"4. **Silent Failures:** Issues where the system fails without an error message (e.g., data disappearing, silent sync failures) are high risk and should be at least High.\n\n"
+		"### Grounding Context\n"
+		"Use these historical examples to identify Steadfast product details, known issues, and appropriate resolution summaries.\n"
 		"Nearest knowledge base examples:\n"
 	)
+
 	if context_lines:
 		message += "\n".join(context_lines)
 	else:
 		message += "(none)"
+
+	message += (
+		"\n\n### Instructions\n"
+		"1. Analyze the ticket subject and body, paying close attention to the customer's plan and any urgency cues.\n"
+		"2. Select the most appropriate category and priority based on the guidelines and escalation rules.\n"
+		"3. For category and priority, provide a brief internal explanation of your reasoning (mentioning specific guidelines/rules applied) and a confidence score (0.0 to 1.0).\n"
+		"4. Draft a specific, professional customer response grounded in the historical examples. If no exact match is found, use general product knowledge from the examples to provide a helpful path forward.\n"
+		"5. Return strict JSON ONLY with the keys: category, category_explanation, category_confidence, priority, priority_explanation, priority_confidence, response, confidence, flags.\n\n"
+		"### Flags Guidance\n"
+		"Include relevant flags in the 'flags' array, such as: 'enterprise-impact', 'onboarding-blocker', 'time-sensitive', 'data-loss-risk', 'sensitive-operation', 'silent-failure', 'workaround-available'.\n\n"
+		f"Allowed Categories: [{allowed_categories}]\n"
+		f"Allowed Priorities: [{allowed_priorities}]\n\n"
+		f"Ticket ID: {ticket.get('ticket_id', '')}\n"
+		f"Customer: {ticket.get('customer_name', '')} (Plan: {ticket.get('plan', '')})\n"
+		f"Subject: {ticket.get('subject', '')}\n"
+		f"Body: {ticket.get('body', '')}\n"
+	)
 	return {"role": "user", "content": message}
 
 
@@ -167,7 +196,20 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 	category = str(payload.get("category", "unknown")).strip().lower()
 	priority = str(payload.get("priority", "medium")).strip().lower()
 	response_text = str(payload.get("response", "")).strip()
-	confidence_raw = payload.get("confidence", 0.75)
+
+	# Extract per-choice explanations and confidence
+	category_explanation = str(payload.get("category_explanation", "")).strip()
+	priority_explanation = str(payload.get("priority_explanation", "")).strip()
+	category_confidence = payload.get("category_confidence", 0.75)
+	priority_confidence = payload.get("priority_confidence", 0.75)
+
+	confidence_raw = payload.get("confidence")
+	if confidence_raw is None:
+		try:
+			confidence_raw = (float(str(category_confidence)) + float(str(priority_confidence))) / 2
+		except (TypeError, ValueError):
+			confidence_raw = 0.75
+
 	try:
 		confidence = float(str(confidence_raw))
 	except (TypeError, ValueError):
@@ -186,7 +228,11 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
 		{
 			"ticket_id": ticket.get("ticket_id", ""),
 			"category": category,
+			"category_explanation": category_explanation,
+			"category_confidence": category_confidence,
 			"priority": priority,
+			"priority_explanation": priority_explanation,
+			"priority_confidence": priority_confidence,
 			"response": response_text,
 			"confidence": max(0.0, min(confidence, 1.0)),
 			"flags": sorted(set(flags + ["llm_used"])),
