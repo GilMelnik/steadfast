@@ -75,6 +75,7 @@ def split_csv(
     train_file: Optional[Union[str, Path]] = None,
     test_file: Optional[Union[str, Path]] = None,
     split_ratio: float = 0.8,
+    num_samples: Optional[int] = None,
     random_seed: int = 42,
     stratify_columns: Optional[List[str]] = None,
 ) -> None:
@@ -83,14 +84,15 @@ def split_csv(
 
     Args:
         input_file: Path to the input CSV file.
-        train_file: Path to save the training set (80% by default).
+        train_file: Path to save the training set.
             If None, saves to "train.csv" next to input_file.
-        test_file: Path to save the testing set (20% by default).
-            If None, saves to "test.csv" next to input_file.
-        split_ratio: Proportion of data for training (default 0.8).
+        test_file: Path to save the testing set.
+            If None, saves to "test.json" next to input_file.
+        split_ratio: Proportion of data for training (default 0.8). Used if num_samples is None.
+        num_samples: Fixed number of samples for the test set. Overrides split_ratio if provided.
         random_seed: Random seed for reproducibility.
         stratify_columns: List of column names to stratify on for representative sampling.
-            If None, recurring fields are auto-detected.
+            If None, defaults to ["category", "priority"] if they exist, otherwise auto-detected.
     """
     df = pd.read_csv(input_file)
     resolved_train_file, resolved_test_file = _resolve_output_paths(
@@ -99,19 +101,46 @@ def split_csv(
         test_file=test_file,
     )
 
+    # Determine test size
+    if num_samples is not None:
+        test_size = min(num_samples, len(df) - 1)
+    else:
+        test_size = 1 - split_ratio
+
+    # Determine stratification columns
     if stratify_columns is None:
-        stratify_columns = find_stratify_columns(df, split_ratio=split_ratio)
+        # Try to use category and priority as requested, either combined or separately
+        possible_stratify_cols = [
+            ["category", "priority"],
+            ["category"],
+            ["priority"]
+        ]
+        # Calculate test rows for validation
+        test_rows = test_size if isinstance(test_size, int) else max(1, int(round(len(df) * test_size)))
+
+        for group in possible_stratify_cols:
+            if all(col in df.columns for col in group):
+                s_series = _build_stratify_series(df, group)
+                if _is_valid_stratify_series(s_series, test_rows):
+                    stratify_columns = group
+                    break
+
+        if stratify_columns is None:
+            # Fallback to auto-detection
+            effective_split_ratio = split_ratio if num_samples is None else 1 - (test_size / len(df))
+            stratify_columns = find_stratify_columns(df, split_ratio=effective_split_ratio)
 
     if stratify_columns:
         stratify_series = _build_stratify_series(df, stratify_columns)
-        test_rows = max(1, int(round(len(df) * (1 - split_ratio))))
+        # Final validation of stratification series against actual test size
+        test_rows = test_size if isinstance(test_size, int) else max(1, int(round(len(df) * test_size)))
         stratify = stratify_series if _is_valid_stratify_series(stratify_series, test_rows) else None
     else:
         stratify = None
 
     train_df, test_df = train_test_split(
         df,
-        test_size=1 - split_ratio,
+        test_size=test_size,
         random_state=random_seed,
         stratify=stratify
     )
@@ -138,5 +167,7 @@ def split_csv(
 
 if __name__ == "__main__":
     split_csv(
-        input_file="data/knowledge_base.csv"
+        input_file="data/knowledge_base.csv",
+        num_samples=50,
+        stratify_columns=["category", "priority"],
     )
