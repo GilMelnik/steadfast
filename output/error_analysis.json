@@ -1,0 +1,302 @@
+{
+  "total_tickets": 46,
+  "root_causes": {
+    "priority_mismatch": 15,
+    "category_mismatch": 3,
+    "category_and_priority_mismatch": 1
+  },
+  "top_category_confusions": [
+    {
+      "expected": "account",
+      "predicted": "billing",
+      "count": 2
+    },
+    {
+      "expected": "onboarding",
+      "predicted": "integration",
+      "count": 1
+    },
+    {
+      "expected": "performance",
+      "predicted": "integration",
+      "count": 1
+    }
+  ],
+  "top_priority_confusions": [
+    {
+      "expected": "medium",
+      "predicted": "high",
+      "count": 7
+    },
+    {
+      "expected": "low",
+      "predicted": "high",
+      "count": 4
+    },
+    {
+      "expected": "high",
+      "predicted": "critical",
+      "count": 3
+    },
+    {
+      "expected": "low",
+      "predicted": "medium",
+      "count": 2
+    }
+  ],
+  "flag_frequency": {
+    "llm_used": 46,
+    "onboarding-blocker": 6,
+    "time-sensitive": 19,
+    "silent-failure": 8,
+    "workaround-available": 18,
+    "enterprise-impact": 14,
+    "sensitive-operation": 8,
+    "data-loss-risk": 5
+  },
+  "error_examples": [
+    {
+      "ticket_id": "EVAL-002",
+      "subject": "Setting up Steadfast for our new team of interns",
+      "expected_category": "onboarding",
+      "predicted_category": "onboarding",
+      "expected_priority": "low",
+      "predicted_priority": "high",
+      "flags": [
+        "llm_used",
+        "onboarding-blocker",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-003",
+      "subject": "Where do I find the API rate limit documentation?",
+      "expected_category": "onboarding",
+      "predicted_category": "integration",
+      "expected_priority": "low",
+      "predicted_priority": "low",
+      "flags": [
+        "llm_used"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-004",
+      "subject": "How to migrate from Trello to Steadfast",
+      "expected_category": "onboarding",
+      "predicted_category": "onboarding",
+      "expected_priority": "low",
+      "predicted_priority": "high",
+      "flags": [
+        "llm_used",
+        "onboarding-blocker"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-008",
+      "subject": "Can't access billing page since this morning",
+      "expected_category": "billing",
+      "predicted_category": "billing",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-010",
+      "subject": "App is super laggy when lots of people are on",
+      "expected_category": "performance",
+      "predicted_category": "performance",
+      "expected_priority": "high",
+      "predicted_priority": "critical",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-012",
+      "subject": "Concerned about data access after employee departure",
+      "expected_category": "security",
+      "predicted_category": "security",
+      "expected_priority": "high",
+      "predicted_priority": "critical",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-014",
+      "subject": "Need MFA enforced for all users in our workspace",
+      "expected_category": "security",
+      "predicted_category": "security",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-016",
+      "subject": "Information about your enterprise solutions",
+      "expected_category": "account",
+      "predicted_category": "billing",
+      "expected_priority": "low",
+      "predicted_priority": "high",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-020",
+      "subject": "Need to enable SCIM provisioning with Okta",
+      "expected_category": "integration",
+      "predicted_category": "integration",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-023",
+      "subject": "Custom field dropdown values not saving",
+      "expected_category": "bug",
+      "predicted_category": "bug",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "llm_used",
+        "silent-failure"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-025",
+      "subject": "Why am I being charged for users who haven't logged in?",
+      "expected_category": "account",
+      "predicted_category": "billing",
+      "expected_priority": "medium",
+      "predicted_priority": "medium",
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-028",
+      "subject": "Someone logged into my account from another location",
+      "expected_category": "security",
+      "predicted_category": "security",
+      "expected_priority": "high",
+      "predicted_priority": "critical",
+      "flags": [
+        "data-loss-risk",
+        "llm_used",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-029",
+      "subject": "Getting rate limited on /v2/analytics endpoint",
+      "expected_category": "performance",
+      "predicted_category": "integration",
+      "expected_priority": "high",
+      "predicted_priority": "high",
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-031",
+      "subject": "New team \u2014 need help with initial workspace setup",
+      "expected_category": "onboarding",
+      "predicted_category": "onboarding",
+      "expected_priority": "low",
+      "predicted_priority": "high",
+      "flags": [
+        "llm_used",
+        "onboarding-blocker",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-034",
+      "subject": "Request for calendar view in project management",
+      "expected_category": "feature_request",
+      "predicted_category": "feature_request",
+      "expected_priority": "low",
+      "predicted_priority": "medium",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "workaround-available"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-035",
+      "subject": "Trying to connect our data warehouse but having issues",
+      "expected_category": "integration",
+      "predicted_category": "integration",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "onboarding-blocker"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-037",
+      "subject": "Need to deactivate former employee accounts",
+      "expected_category": "account",
+      "predicted_category": "account",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "data-loss-risk",
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-040",
+      "subject": "Charts in exported PDF are low resolution",
+      "expected_category": "bug",
+      "predicted_category": "bug",
+      "expected_priority": "low",
+      "predicted_priority": "medium",
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ]
+    },
+    {
+      "ticket_id": "EVAL-044",
+      "subject": "Cascade not propagating role changes to child spaces",
+      "expected_category": "bug",
+      "predicted_category": "bug",
+      "expected_priority": "medium",
+      "predicted_priority": "high",
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "silent-failure",
+        "workaround-available"
+      ]
+    }
+  ]
+}

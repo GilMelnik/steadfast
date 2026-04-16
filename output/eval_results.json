@@ -1,0 +1,1039 @@
+{
+  "validation_failure_rate": 0.0,
+  "metrics": {
+    "num_tickets": 46,
+    "category_accuracy_exact": 0.913,
+    "category_accuracy_with_partial_credit": 0.9239,
+    "priority_accuracy_exact": 0.6522,
+    "priority_accuracy": 0.8551,
+    "response_quality_score": 0.9476,
+    "per_category": {
+      "account": {
+        "count": 6,
+        "avg_category_score": 0.6667
+      },
+      "billing": {
+        "count": 4,
+        "avg_category_score": 1.0
+      },
+      "bug": {
+        "count": 11,
+        "avg_category_score": 1.0
+      },
+      "feature_request": {
+        "count": 5,
+        "avg_category_score": 1.0
+      },
+      "integration": {
+        "count": 8,
+        "avg_category_score": 1.0
+      },
+      "onboarding": {
+        "count": 5,
+        "avg_category_score": 0.9
+      },
+      "performance": {
+        "count": 4,
+        "avg_category_score": 0.75
+      },
+      "security": {
+        "count": 3,
+        "avg_category_score": 1.0
+      }
+    },
+    "per_priority": {
+      "critical": {
+        "count": 4,
+        "avg_priority_score": 1.0
+      },
+      "high": {
+        "count": 14,
+        "avg_priority_score": 0.9286
+      },
+      "low": {
+        "count": 14,
+        "avg_priority_score": 0.7619
+      },
+      "medium": {
+        "count": 14,
+        "avg_priority_score": 0.8334
+      }
+    },
+    "top_confusions": [
+      {
+        "expected": "account",
+        "predicted": "billing",
+        "count": 2
+      },
+      {
+        "expected": "onboarding",
+        "predicted": "integration",
+        "count": 1
+      }
+    ],
+    "resource_usage": {
+      "total_input_tokens": 63917,
+      "total_output_tokens": 29282,
+      "total_time_seconds": 12.8145,
+      "total_time_hh_mm_ss": "00:00:13",
+      "avg_input_tokens_per_ticket": 1389.5,
+      "avg_output_tokens_per_ticket": 636.5652,
+      "avg_time_seconds_per_ticket": 0.2786,
+      "avg_time_hh_mm_ss_per_ticket": "00:00:00"
+    }
+  },
+  "predictions": [
+    {
+      "ticket_id": "EVAL-001",
+      "category": "integration",
+      "category_explanation": "The ticket involves importing/uploading a CSV file into Steadfast, which is a data integration/import issue. This aligns with the 'integration' category covering API, sync failures, and data exchange with external systems. Historical examples TK-0149 and TK-0414 show similar CSV import/export issues classified under integration.",
+      "category_confidence": 0.82,
+      "priority": "high",
+      "priority_explanation": "The customer explicitly states 'we cannot use the platform without this data,' indicating this is a workflow-blocking issue where the team cannot proceed. This meets the High priority criteria for workflow-blocking issues. The mention of Hebrew characters suggests a UTF-8/encoding issue similar to TK-0149. While the customer is on a Growth plan (not Enterprise), the inability to use the platform at all without this import suggests this may also be an onboarding/migration blocker for initial data setup, which per escalation rule #2 should be treated as High priority.",
+      "priority_confidence": 0.88,
+      "response": "Hello,\n\nThank you for reaching out, and no need to apologize for your English \u2014 your message is perfectly clear!\n\nI'm sorry you're running into trouble with your CSV import. Based on what you've described, this is very likely related to character encoding, especially since you're using Hebrew text in some fields. We've seen similar issues before where special characters and non-Latin scripts cause the import parser to reject the file.\n\nHere are a few things to try while our team investigates further:\n\n1. **Ensure UTF-8 encoding:** When saving your CSV file, make sure it is saved with UTF-8 encoding (specifically \"UTF-8 with BOM\" if you're using Excel). In Excel, you can do this by choosing \"Save As\" \u2192 \"CSV UTF-8 (Comma delimited)\".\n\n2. **Check for hidden special characters:** Sometimes CRM exports include invisible characters (such as BOM markers or non-breaking spaces) that can cause format validation errors. Opening the file in a plain text editor (like Notepad++ or VS Code) can help you spot these.\n\n3. **Verify delimiter format:** Confirm that your file uses commas as delimiters and that Hebrew text fields are properly enclosed in double quotes, especially if any field values contain commas.\n\nIf the issue persists after trying these steps, please send us the CSV file (or a sample with a few rows) and a screenshot of the exact error message, and we'll have our integration team take a closer look. We've resolved similar encoding-related import issues in the past and want to make sure you can get your data loaded as quickly as possible.\n\nWe understand this is blocking your ability to use the platform, so we're treating this with high priority.\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.84,
+      "flags": [
+        "llm_used",
+        "onboarding-blocker",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1394,
+        "output_tokens": 707,
+        "time_taken": 0.403974
+      }
+    },
+    {
+      "ticket_id": "EVAL-002",
+      "category": "onboarding",
+      "category_explanation": "The customer is asking for setup help for new team members, including 'how to' questions about permissions, account types, and seat requirements. This is a classic onboarding/getting-started scenario for configuring new users.",
+      "category_confidence": 0.95,
+      "priority": "high",
+      "priority_explanation": "Per the Onboarding/Migration escalation rule, initial setup and onboarding are time-sensitive blockers for new users. The customer explicitly states interns are 'starting next week,' making this time-sensitive. While this is a Growth plan (not Enterprise), the time pressure and the need to onboard 10 users correctly before their start date warrants High priority.",
+      "priority_confidence": 0.88,
+      "response": "Hi Tundra Analytics team,\n\nWelcome \u2014 we're happy to help you get everything set up before your interns arrive next week! Here's a step-by-step plan to get them onboarded with the right level of access:\n\n**1. Seats & Account Type**\nRegarding whether you need to upgrade for more seats, this depends on your current seat count on the Growth plan. You can check your available seats under **Settings > Billing > Subscription**. If adding 10 users would exceed your current seat allotment, you'll need to add seats (or consider using guest accounts if your plan supports them, which may have different seat implications). Our billing team can help clarify the most cost-effective option for temporary/seasonal users.\n\n**2. Permissions Setup (Recommended Approach)**\nBased on your requirements \u2014 access to only two specific projects with no delete permissions \u2014 here's what we recommend:\n\n- **Role:** Assign the interns the **'Member'** role. Note that the default 'Member' role has no project access by default, which is actually ideal for your use case since you want to restrict visibility.\n\n- **Permission Group:** Create a dedicated permission group (e.g., \"Summer Interns\") with **create/edit permissions but no delete access**. This ensures they can contribute without accidentally removing anything.\n\n- **Project Access:** Navigate to **Settings > Teams > Select team > Add to permission group** and grant the intern permission group visibility to only the two specific projects they need.\n\n**3. Streamlining the Process**\nWe also recommend setting up **auto-assignment rules** so that when you invite the interns, they automatically inherit the correct permission group. This saves time and ensures consistency across all 10 accounts. You can configure this under your team settings.\n\n**Quick Summary of the Permission Hierarchy:**\n- **Roles** = global access level (use 'Member')\n- **Permission Groups** = feature-level access (create/edit, no delete)\n- **Team Permissions** = project-level visibility (restrict to your two projects)\n\nIf you'd like, I can also connect you with our billing team to review the most efficient seat arrangement for temporary users on your Growth plan.\n\nPlease don't hesitate to reach out if you have any questions during setup \u2014 we want to make sure everything is ready before next week!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "llm_used",
+        "onboarding-blocker",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1403,
+        "output_tokens": 791,
+        "time_taken": 0.341165
+      }
+    },
+    {
+      "ticket_id": "EVAL-003",
+      "category": "integration",
+      "category_explanation": "The customer is asking about API rate limit documentation, which falls squarely under the integration category (API, webhooks, third-party apps). This is a documentation/information request related to API usage.",
+      "category_confidence": 0.97,
+      "priority": "low",
+      "priority_explanation": "This is a general 'how-to' / informational question about API documentation. There is no reported issue, no broken functionality, no urgency cues, and no business-critical deadline mentioned. The customer is on a Starter plan and is simply looking for documentation before building an integration. Per guidelines, general 'how-to' questions with no immediate urgency are Low priority.",
+      "priority_confidence": 0.95,
+      "response": "Hi Goldleaf Digital,\n\nThank you for reaching out, and welcome to building with the Steadfast API!\n\nOur API documentation, including rate limiting details, is available at **docs.steadfast.io/api**. Here are some direct links that should help you get started:\n\n- **Rate Limiting Documentation** \u2014 This covers requests per minute, burst limits, and how limits vary by plan and endpoint.\n- **Authentication Guide** \u2014 For setting up your API credentials.\n- **REST API Reference** \u2014 Full endpoint documentation.\n- **Webhook Documentation** \u2014 If you'd like to use webhooks for real-time events (which can help reduce API polling and stay well within rate limits).\n- **SDKs** \u2014 We offer official SDKs for Python, Node.js, and Ruby.\n\nFor a great starting point, I'd also recommend our **Getting Started with the API** tutorial (KB-1050), which walks through common integration patterns.\n\nAs a general note, rate limits do vary by plan. If you find that your integration needs exceed the limits on the Starter plan as you scale, feel free to reach out and we can discuss options.\n\nAdditionally, we have an active **developer Slack community** where you can connect with other developers building on our API \u2014 happy to send you an invite if you're interested!\n\nLet us know if you have any other questions as you build out your integration.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used"
+      ],
+      "usage": {
+        "input_tokens": 1396,
+        "output_tokens": 551,
+        "time_taken": 0.238343
+      }
+    },
+    {
+      "ticket_id": "EVAL-004",
+      "category": "onboarding",
+      "category_explanation": "This is a new customer asking how to migrate data from a previous project management tool (Trello) to Steadfast. This is a classic onboarding/migration 'how to' question, matching the onboarding category definition for 'setup help for new teams, how to questions, initial migrations from other tools.'",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "Per Strategic Escalation Rule #2, 'Initial setup and data migrations are time-sensitive blockers for new customers; treat these as High priority.' The customer is actively switching from Trello and needs to migrate 3,000 cards across 20 boards, which is a meaningful migration that blocks their adoption of Steadfast. Although they are on a Starter plan (not Enterprise), the escalation rule for onboarding/migration applies regardless of plan tier.",
+      "priority_confidence": 0.9,
+      "response": "Hi RapidScale Systems,\n\nWelcome to Steadfast! We're excited to help you make the switch from Trello. With 3,000 cards across 20 boards, we want to make sure your migration goes smoothly.\n\nWe have a comprehensive migration guide (KB-1015) that covers your options. Here are the three approaches available:\n\n1. **CSV Import (Manual but Flexible):** You can export your Trello boards to CSV and import them into Steadfast. This gives you the most control over field mapping but requires some manual effort, especially at your volume.\n\n2. **Direct Import Tool:** Navigate to **Settings > Import** to access our built-in import tools. This is typically the recommended approach for migrations of your size, as it handles the bulk of the work automatically.\n\n3. **API-Based Migration:** For full-fidelity migration, you can use our API to programmatically transfer data. This preserves the most detail but requires some technical setup.\n\nRegarding your specific requirements:\n- **Labels, assignments, and due dates** are all supported through our import tools and can be mapped to corresponding Steadfast fields.\n- **Attachments** can be preserved during migration as well.\n- We support custom field mapping for up to 20 fields, which should cover your Trello labels and any custom data.\n\nGiven your volume of 3,000 cards across 20 boards, I'd recommend starting with the direct import tool (Option 2) for efficiency. If you need more granular control over specific fields, the API-based approach is a great alternative.\n\nWe'd also be happy to schedule a **migration assistance session** with our onboarding team to walk you through the process and ensure everything transfers correctly. Just let us know a time that works for you!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.93,
+      "flags": [
+        "llm_used",
+        "onboarding-blocker"
+      ],
+      "usage": {
+        "input_tokens": 1476,
+        "output_tokens": 696,
+        "time_taken": 0.218912
+      }
+    },
+    {
+      "ticket_id": "EVAL-005",
+      "category": "integration",
+      "category_explanation": "The ticket describes a webhook not triggering consistently for task status changes, which falls squarely under the integration category (webhooks, API, third-party apps, sync failures).",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "This is a silent failure scenario \u2014 approximately half of webhook events are silently not firing without error messages, which meets the 'Silent Failures' escalation rule (issues where the system fails without an error message are high risk and should be at least High). Additionally, the customer explicitly states their automation pipeline depends on these events, making this a workflow-blocking issue. While Harborview Insurance is on a Growth plan (not Enterprise), the silent failure nature and workflow-blocking impact justify High priority.",
+      "priority_confidence": 0.9,
+      "response": "Hi Harborview Insurance team,\n\nThank you for reaching out about the inconsistent webhook triggering for task status changes. I understand this is impacting your automation pipeline, and I want to help resolve this as quickly as possible.\n\nBased on what you've described \u2014 approximately half of status change events not firing \u2014 and similar webhook issues we've investigated previously, here are a few things I'd like to check:\n\n1. **Webhook Authentication Type:** Could you confirm whether your webhook subscription is using our authenticated webhook option (with an API key in the header) or an unauthenticated webhook? Unauthenticated webhooks have a 30-day TTL and can sometimes exhibit inconsistent behavior as they approach expiration. If you're using unauthenticated webhooks, I'd strongly recommend switching to our authenticated webhook option, which doesn't expire and provides more reliable delivery.\n\n2. **Subscription Status:** Even though you've verified the subscription appears active, I'd like to check the subscription state on our backend to ensure there isn't a partial degradation or a subscription that was silently re-created with a narrower event scope.\n\n3. **Event Filtering:** Could you confirm whether the webhook is subscribed to all task status change events, or if there's any filtering configured? Sometimes specific status transitions may not match the configured trigger criteria.\n\nIn the meantime, I'm escalating this to our engineering team to investigate the delivery logs for your webhook endpoint and identify why certain events are being dropped. We'll review the event queue to determine if the events are being generated but failing to deliver, or if they're not being generated at all.\n\nCould you provide the following to help us investigate?\n- Your webhook subscription ID or endpoint URL\n- A few specific examples of task status changes that did NOT trigger a webhook (task IDs and approximate timestamps)\n- A few examples that DID trigger successfully for comparison\n\nThis will help us pinpoint the pattern and get your automation pipeline back to full reliability.\n\nThank you for your patience, and we'll prioritize getting this resolved for you.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.88,
+      "flags": [
+        "llm_used",
+        "silent-failure",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1389,
+        "output_tokens": 723,
+        "time_taken": 0.271286
+      }
+    },
+    {
+      "ticket_id": "EVAL-006",
+      "category": "performance",
+      "category_explanation": "The ticket describes progressively worsening page load times, choppy scrolling, and slow project opening \u2014 all classic performance/latency symptoms. This aligns directly with the 'performance' category definition: 'Slowness, lag, timeouts, high latency, UI freezing.'",
+      "category_confidence": 0.95,
+      "priority": "high",
+      "priority_explanation": "This is an Enterprise account with 100 users experiencing degrading performance that is described as a 'productivity issue.' Per the Enterprise Impact escalation rule, issues affecting multiple users or core workflows on an Enterprise plan should be escalated to High or Critical. While not a total outage (which would be Critical), the progressive degradation affecting the entire 100-person team's core workflows \u2014 loading pages, scrolling tasks, opening projects \u2014 makes this solidly High. Load times of 8-12 seconds are severe but the system is still functional, keeping it below Critical.",
+      "priority_confidence": 0.9,
+      "response": "Hi Peakline Software team,\n\nThank you for reaching out, and I'm sorry to hear about the progressive performance degradation you've been experiencing. With 100 users relying on Steadfast daily, I understand how impactful this is to your team's productivity.\n\nBased on your description \u2014 8-12 second page loads, choppy task list scrolling, and slow project opening across a workspace with ~50,000 tasks and 40 projects \u2014 this is consistent with patterns we've seen before related to database query optimization, particularly around custom field filters and large dataset rendering.\n\nHere's what we're going to do:\n\n1. **Immediate Investigation:** I'm escalating this to our performance engineering team to analyze your workspace's query patterns and identify any bottlenecks \u2014 such as unoptimized joins or missing indexes on frequently queried tables.\n2. **CDN & Caching Review:** We'll also review whether CDN caching for static assets is properly enabled for your workspace, as this has resolved similar slowdowns for other Enterprise customers.\n3. **Workspace Profiling:** Given the scale of your workspace (50K tasks, 40 projects, 100 users), we'll run a targeted performance profile to pinpoint exactly where the latency is occurring.\n\nIn previous cases with similar symptoms, we've been able to reduce load times from 30-45 seconds down to 2-3 seconds by adding proper database indexes and enabling asset caching. I'm confident we can achieve a significant improvement for your team as well.\n\nA member of our engineering team will follow up within 24 hours with initial findings. In the meantime, if there are specific projects or views that are particularly slow, please let us know so we can prioritize those in our analysis.\n\nThank you for your patience, and we'll get this resolved as quickly as possible.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.93,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1385,
+        "output_tokens": 717,
+        "time_taken": 0.271446
+      }
+    },
+    {
+      "ticket_id": "EVAL-007",
+      "category": "integration",
+      "category_explanation": "This ticket concerns the behavior of the Slack integration and how notifications are posted to Slack channels. It directly involves a third-party app integration (Slack) and how data is relayed between Steadfast and Slack, fitting squarely in the 'integration' category.",
+      "category_confidence": 0.95,
+      "priority": "medium",
+      "priority_explanation": "This is an issue with the Slack integration producing incorrect/confusing behavior (notifications attributed to 'Steadfast Bot' instead of the actual user). The feature is functional\u2014notifications are being posted\u2014but the content is misleading. This is an intermittent/confusing behavior issue affecting usability rather than blocking a core workflow. The customer is on a Growth plan (not Enterprise), and there is no indication of a business-critical deadline or data loss. A workaround exists (users can check Steadfast directly for attribution). This aligns with medium priority for confusing behavior with available workarounds.",
+      "priority_confidence": 0.85,
+      "response": "Hi Steelbridge Consulting team,\n\nThank you for reaching out about this Slack integration issue. I understand how important it is for your team to see accurate user attribution in Slack notifications \u2014 it's a key part of keeping your channel useful and actionable.\n\nWe're aware that the Slack integration currently posts notifications under the 'Steadfast Bot' identity. This is related to how our integration authenticates with Slack's API \u2014 notifications are sent via the bot token, which attributes all messages to the bot user rather than the individual who performed the action in Steadfast.\n\nWe've seen similar Slack integration nuances before (such as channel routing issues where the integration was storing channel names instead of channel IDs). Our integrations team is actively working on improving how user context is passed through to Slack notifications.\n\nIn the meantime, here are a couple of things to note:\n\n- The notification message body should still reference the user's name in the text content (e.g., \"John completed task X\"), even if the message sender appears as Steadfast Bot. If the user's name is also missing from the message text itself, that may indicate a separate bug, and we'd like to investigate further.\n- We'll flag this with our integrations team to explore whether we can improve the attribution display, potentially by using richer Slack message formatting to make the acting user more prominent.\n\nCould you confirm whether the actual user's name is missing from the message content as well, or if it's only the Slack message sender/avatar that shows as Steadfast Bot? That will help us determine the best path forward.\n\nThank you for your patience, and we'll keep you updated on any improvements to the Slack integration.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.82,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1376,
+        "output_tokens": 684,
+        "time_taken": 0.245222
+      }
+    },
+    {
+      "ticket_id": "EVAL-008",
+      "category": "billing",
+      "category_explanation": "The customer is trying to access the billing page to download an invoice. This is a billing-related issue (accessing invoices/billing section), even though the symptom is a blank page which could suggest a bug. The primary intent and impact are billing-related.",
+      "category_confidence": 0.65,
+      "priority": "high",
+      "priority_explanation": "The billing page is completely inaccessible (not intermittent), blocking the customer from downloading an invoice needed for an expense report. This is a workflow-blocking issue related to a sensitive administrative area (billing). Per the Sensitive Operations escalation rule, billing-related access issues should be treated as High priority. The customer has also confirmed the issue persists across multiple browsers, ruling out a simple browser cache issue.",
+      "priority_confidence": 0.85,
+      "response": "Hi there,\n\nThank you for reaching out, and I'm sorry you're unable to access the billing page this morning. I understand you need to download your latest invoice for an expense report, so let's get this resolved quickly.\n\nWe're aware that blank pages in specific sections can sometimes be caused by a rendering or service issue on our end. I've flagged this with our engineering team to investigate whether there's a backend issue affecting the billing page.\n\nIn the meantime, here are a couple of things that may help:\n\n1. **Clear your browser cache and cookies** for the Steadfast domain, then try again.\n2. **Try accessing the billing page in an incognito/private browsing window** to rule out any extension conflicts.\n\nIf you need the invoice urgently before we resolve the page issue, please let me know and I can have our team send it to you directly via email.\n\nWe'll keep you updated as we investigate. Thank you for your patience!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.78,
+      "flags": [
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1348,
+        "output_tokens": 477,
+        "time_taken": 0.278511
+      }
+    },
+    {
+      "ticket_id": "EVAL-009",
+      "category": "integration",
+      "category_explanation": "This is an SSO authentication issue involving the redirect flow between the customer's Identity Provider and Steadfast. SSO-related issues fall under the 'integration' category per guidelines (SSO/Okta, third-party apps). Historical tickets TK-0320, TK-0179, and TK-0624 all deal with similar SSO/SAML authentication failures and are categorized under integration or security. The redirect loop pattern specifically matches TK-0179 (session cookie conflict with SSO redirect) and TK-0320 (SAML assertion validation race condition).",
+      "category_confidence": 0.88,
+      "priority": "critical",
+      "priority_explanation": "This is an Enterprise account with approximately half of their users unable to log in \u2014 a total login failure for a significant portion of the organization. Per the Enterprise Impact escalation rule, issues affecting multiple users or core workflows on an Enterprise plan should be escalated to High or Critical. Login is the most fundamental workflow. Additionally, the classification guidelines list 'total login failure' as critical. While not all users are affected, half of an Enterprise organization being locked out constitutes a production-impacting, business-critical issue.",
+      "priority_confidence": 0.92,
+      "response": "Hello Maplewood Health team,\n\nThank you for reporting this \u2014 I understand how disruptive it is to have a significant portion of your team unable to access Steadfast. We're treating this as a critical priority issue.\n\nBased on the symptoms you've described \u2014 successful IdP authentication followed by a redirect loop back to the login page \u2014 this pattern is consistent with a few known root causes we've resolved for other customers:\n\n1. **Session cookie conflict:** A mismatch between the SSO redirect and the app session handler can cause the login page to not recognize the authenticated session, resulting in a loop. This has been resolved previously by updating the cookie domain scope and adding a cache-busting parameter to the SSO callback URL.\n\n2. **SAML assertion validation issue:** A race condition in SAML assertion processing can cause intermittent failures, which would explain why only some users are affected (e.g., those authenticating simultaneously or being routed to a specific service node).\n\n3. **Certificate rotation:** If your IdP recently rotated its signing certificate, the SAML validation on Steadfast's side may be failing for sessions validated against the new certificate. You can verify and update the certificate under **Admin > Security > SSO Configuration**.\n\nAs an immediate step, could you please check:\n- Whether the affected users share any common trait (e.g., specific IdP group, browser, or network)?\n- Whether any IdP configuration or certificate changes were made around the time this started yesterday?\n- Whether clearing browser cookies and cache resolves the loop for any affected users?\n\nWe are escalating this to our engineering team immediately for investigation on our end. We'll keep you updated with findings as soon as possible.\n\nThank you for your patience, and please don't hesitate to reach out if the situation changes.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.9,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1323,
+        "output_tokens": 761,
+        "time_taken": 0.234715
+      }
+    },
+    {
+      "ticket_id": "EVAL-010",
+      "category": "performance",
+      "category_explanation": "The ticket describes slowness, lag, UI freezing, and unresponsive clicks during peak usage hours. These are classic performance symptoms (latency, freezing) matching the 'performance' category definition.",
+      "category_confidence": 0.97,
+      "priority": "critical",
+      "priority_explanation": "This is an Enterprise account with 150 users experiencing daily workflow-blocking performance degradation during core business hours (9-11 AM). Per the Enterprise Impact escalation rule, issues affecting multiple users or core workflows on an Enterprise plan should be escalated to High or Critical. Given that this affects the entire team's productivity during peak hours with app freezes and unresponsive UI, this warrants Critical priority. The historical example TK-0393 shows a similar pattern of severe load times that was classified as high priority for what appears to be a smaller-scale issue \u2014 this is broader in scope.",
+      "priority_confidence": 0.88,
+      "response": "Hi Firebrand Media team,\n\nThank you for reporting this \u2014 I completely understand how disruptive daily slowdowns during your team's peak hours must be, especially with 150 users relying on Steadfast.\n\nWe're treating this as a critical priority issue. Based on similar cases we've resolved, performance degradation during peak concurrent usage can stem from a few root causes, including database query bottlenecks (particularly with custom field filters or complex views) and resource contention at the workspace level.\n\nHere's what we're doing right away:\n\n1. **Immediate Investigation:** Our engineering team will analyze your workspace's performance metrics during the 9\u201311 AM window to identify bottlenecks \u2014 whether that's database queries, unoptimized indexes, or infrastructure capacity.\n2. **CDN & Caching Review:** We'll verify that static asset caching and CDN delivery are fully optimized for your workspace.\n3. **Concurrency Analysis:** With 150 concurrent users, we'll assess whether any workspace-specific configurations (custom fields, filters, dashboards) are contributing to the load.\n\nTo help us investigate more efficiently, could you provide a few details?\n- Are there specific pages or views that are most affected (e.g., dashboards, board views, list views with many filters)?\n- Has your team recently added new custom fields, automations, or integrations?\n- Approximately when did this issue first start occurring?\n\nWe'll have an initial assessment back to you within the next few hours. In the meantime, if there are specific high-traffic views that seem worst, simplifying filters temporarily may provide some relief while we work on a permanent fix.\n\nThank you for your patience, and we'll keep you closely updated.\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.93,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1421,
+        "output_tokens": 683,
+        "time_taken": 0.238633
+      }
+    },
+    {
+      "ticket_id": "EVAL-011",
+      "category": "bug",
+      "category_explanation": "The customer reports that automated notifications are firing for every status change instead of only when tasks become overdue. This is unexpected behavior \u2014 either a misconfiguration that results in confusing behavior or a functional issue with the automation builder. Given the system is not behaving as the user intended and the automation builder is described as 'confusing,' this best fits 'bug' (unexpected behavior / confusing behavior). It could also overlap with 'onboarding' since they just started using the feature, but the core complaint is about the feature not working as expected.",
+      "category_confidence": 0.65,
+      "priority": "medium",
+      "priority_explanation": "This is an intermittent/confusing behavior issue on a Starter plan affecting a single team's automation setup. The customer has a workaround available (manual notification or reconfiguration), and there is no data loss, security risk, or production-down scenario. The customer is new to the feature, which adds some onboarding sensitivity, but this does not meet the threshold for high priority under the escalation rules (not Enterprise, not a migration blocker, not a silent failure). Medium is appropriate for confusing behavior with available workarounds.",
+      "priority_confidence": 0.8,
+      "response": "Hi Cliffside Ventures team,\n\nThank you for reaching out, and welcome to using Steadfast's automation features!\n\nBased on your description, it sounds like the automation rule may be configured to trigger on all status changes rather than specifically on the \"overdue\" condition. This is a common setup issue with the automation builder, and the good news is it should be straightforward to resolve.\n\nHere's what I'd recommend:\n\n1. **Review your automation trigger:** Navigate to your automation rule and check the trigger condition. Make sure it is set specifically to \"Task becomes overdue\" rather than a general \"Status change\" trigger. These are separate trigger types in the builder.\n\n2. **Check your notification settings:** You can also configure overdue-specific reminders under **Settings > Notifications > Due Date Reminders**. This allows you to set alerts at intervals like 7 days, 3 days, 1 day before, same-day, and overdue \u2014 and you can enable multiple intervals. Per-project settings are also available in your project settings.\n\n3. **Verify recipients:** Ensure the notification target is set to \"Team Leads\" or the appropriate role/user group, rather than all project members.\n\nIf after reviewing these settings the notifications are still firing incorrectly, please share a screenshot of your automation rule configuration and we'll take a closer look to determine if this is a product bug.\n\nWe're happy to help walk you through the setup if you'd like \u2014 just let us know!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.7,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1373,
+        "output_tokens": 688,
+        "time_taken": 0.296958
+      }
+    },
+    {
+      "ticket_id": "EVAL-012",
+      "category": "security",
+      "category_explanation": "The ticket involves concerns about unauthorized access after an employee departure, session termination, and auditing user activity \u2014 all core security concerns (suspicious activity, unauthorized access, audits).",
+      "category_confidence": 0.97,
+      "priority": "critical",
+      "priority_explanation": "This involves a potential security breach risk from a departed employee with admin-level access who left on bad terms. Per the classification guidelines, suspicious activity and unauthorized access are security issues, and the risk of a security breach warrants critical priority. Additionally, per Strategic Escalation Rule #1 (Enterprise Impact) and Rule #4 (sensitive operations/security configurations), this should be escalated. The customer is on an Enterprise plan, and the urgency of ensuring no unauthorized access to company data makes this critical.",
+      "priority_confidence": 0.93,
+      "response": "Hello Prism Education team,\n\nThank you for reaching out immediately about this \u2014 we take account security very seriously, and I want to assure you we'll help you address this thoroughly.\n\nHere are the immediate steps we can take and recommend:\n\n**1. Session Termination:**\nWe can confirm and force-terminate all active sessions for the departed user from our side. To expedite this, please provide us with the user's email address or username associated with their Steadfast account, and we will revoke all active sessions immediately.\n\n**2. Deactivate/Remove the User Account:**\nIf you haven't already, please navigate to **Settings > Admin > User Management**, locate the user, and either deactivate or remove their account. Deactivating will immediately revoke all access while preserving their activity history for auditing purposes.\n\n**3. Review API Keys & Integrations:**\nIf the departed user created any API keys, webhooks, or configured third-party integrations (SSO, Slack, Jira, etc.), we strongly recommend revoking those as well. You can review these under **Settings > Integrations** and **Settings > API Keys**.\n\n**4. Access Audit:**\nAs an Enterprise customer, you have access to admin activity reporting via **Settings > Admin > Activity**, which covers user management actions and access logs. For a comprehensive audit of everything this user accessed over the last 30 days, I'm escalating this to our security team who can generate a detailed access report for you. Full audit logging capabilities are also being expanded for Enterprise plans (targeted for end of Q2) under feature request FR-2931, which will provide even more granular tracking going forward.\n\n**5. Additional Security Recommendations:**\n- Review and rotate any shared credentials or tokens the user may have had access to.\n- Verify your SSO/MFA configurations are up to date (if using Okta or another provider, ensure the user is deprovisioned there as well).\n- Review role assignments and permissions to ensure no other accounts have elevated access that isn't needed (**Roles > Permission Groups > Team Permissions** hierarchy).\n\nI've flagged this as a critical security matter and am escalating to our security team for the detailed 30-day access audit. You should expect to hear from them within the next few hours.\n\nPlease reply with the user's account details so we can begin the session revocation immediately.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.94,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1379,
+        "output_tokens": 818,
+        "time_taken": 0.293198
+      }
+    },
+    {
+      "ticket_id": "EVAL-013",
+      "category": "billing",
+      "category_explanation": "The customer is reporting duplicate charges on their invoice, which is clearly a billing issue involving charges and refunds. This matches the 'billing' category definition: 'Invoices, charges, refunds, payments, billing cycles.'",
+      "category_confidence": 0.99,
+      "priority": "high",
+      "priority_explanation": "Duplicate charges are a sensitive billing operation involving financial impact to the customer. Per the Sensitive Operations escalation rule, billing updates are high-stakes and should be High priority. The customer is also explicitly requesting prompt resolution ('as soon as possible'). While the Growth plan doesn't trigger Enterprise escalation, the financial impact of an erroneous double charge and the customer's urgency warrant High priority. Historical examples show similar double-charge tickets ranging from low to high; given the clear financial impact and urgency cues, High is appropriate.",
+      "priority_confidence": 0.85,
+      "response": "Hi Starlight Logistics team,\n\nThank you for reaching out, and I'm sorry about the duplicate charge on your February invoice. I completely understand the urgency.\n\nWe've seen this type of issue before \u2014 it's typically caused by a duplicate webhook from our payment processor (Stripe) during a retry window. I'm escalating this to our billing team immediately so they can investigate and confirm the duplicate transaction.\n\nOnce confirmed, we will process a refund of $1,680 for the duplicate charge. You'll receive a refund reference number for your records, and the refund should appear on your statement within 5\u201310 business days depending on your bank.\n\nWe've also implemented idempotency checks on our end to help prevent this from recurring, but our team will verify that your account is fully protected going forward.\n\nI'll follow up with you as soon as the refund has been initiated. If you have any additional details (such as transaction IDs from your bank statement), please feel free to share them to help expedite the investigation.\n\nThank you for your patience, and again, my apologies for the inconvenience.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1366,
+        "output_tokens": 532,
+        "time_taken": 0.246769
+      }
+    },
+    {
+      "ticket_id": "EVAL-014",
+      "category": "security",
+      "category_explanation": "The ticket is about enforcing MFA (Multi-Factor Authentication) across the workspace, which falls squarely under security configuration and compliance. The classification guidelines explicitly list 'MFA/2FA' under the security category.",
+      "category_confidence": 0.98,
+      "priority": "high",
+      "priority_explanation": "This is a security configuration request tied to an Enterprise IT security policy, making it a sensitive operation. Per the Strategic Escalation Rules, 'security configurations are high-stakes and should be High priority.' Additionally, this affects all users on an Enterprise plan, triggering the 'Enterprise Impact' rule. While there is no active breach or immediate production impact that would warrant critical, the compliance requirement and Enterprise-wide scope justify high priority.",
+      "priority_confidence": 0.9,
+      "response": "Hello Basalt Engineering team,\n\nThank you for reaching out regarding MFA enforcement for your workspace. We fully support your IT security policy requirements.\n\nSteadfast does support workspace-wide MFA enforcement at the admin level. Here's how to configure it:\n\n1. Navigate to **Admin** > **Security** > **Authentication Settings**.\n2. Look for the **Multi-Factor Authentication** section.\n3. Enable the **Enforce MFA for all users** toggle. This will require all users who have not yet configured MFA to set it up on their next login \u2014 no exceptions.\n\nOnce enabled, any user without MFA configured will be prompted to complete MFA setup before they can access the workspace. This applies to all roles and permission levels.\n\nA few additional recommendations for your Enterprise security posture:\n- You may also want to review your **Permission Groups** and **Role hierarchy** (Roles > Permission Groups > Team Permissions) to ensure access controls align with your broader security policies.\n- If you're also using SSO (e.g., Okta or Azure AD), MFA enforcement can be layered with your identity provider's MFA policies for defense in depth. SSO settings can be managed under **Admin** > **Security** > **SSO**.\n\nIf you encounter any issues during configuration or need assistance with additional security compliance requirements (such as RBAC audits or access logging), please don't hesitate to reach out. We're happy to schedule a call with your IT team to walk through the setup.\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.88,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation"
+      ],
+      "usage": {
+        "input_tokens": 1387,
+        "output_tokens": 596,
+        "time_taken": 0.242819
+      }
+    },
+    {
+      "ticket_id": "EVAL-015",
+      "category": "bug",
+      "category_explanation": "The customer reports that all dashboard widgets are showing 'Error loading data' messages, which is a broken feature / unexpected behavior. This aligns directly with the 'bug' category definition: broken features, errors, unexpected behavior, UI glitches, 'not working', or functional regressions.",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "This is a workflow-blocking issue affecting a team of 25 users \u2014 the dashboard is completely broken and they rely on it for daily standups, meaning the team cannot proceed with their normal workflow. While the Growth plan doesn't trigger the Enterprise escalation rule, the multi-user impact and workflow-blocking nature (no workaround mentioned for the standup use case) elevate this to High priority. It doesn't reach Critical because the rest of the app is functional and there is no data loss, security breach, or production-down scenario.",
+      "priority_confidence": 0.88,
+      "response": "Hi there,\n\nThank you for reaching out, and I'm sorry to hear that your dashboard widgets are showing 'Error loading data' messages. I understand this is impacting your team of 25 and your daily standup workflow, so I want to help get this resolved as quickly as possible.\n\nWe've seen similar dashboard issues in recent updates \u2014 for example, a data aggregation bug was identified in v3.14.2 that affected dashboard data rendering, which was resolved in a subsequent hotfix (v3.14.3). Your symptoms may be related to a similar issue.\n\nHere's what we're doing:\n\n1. **Immediate investigation:** I'm escalating this to our engineering team to check for any recent deployment or backend service issues that could be causing the widget errors.\n2. **Diagnostics:** Could you let us know the following to help us narrow things down?\n   - Are all users on your team seeing the same error, or is it limited to certain roles/permissions?\n   - What browser(s) and device(s) are affected?\n   - Have you tried clearing your browser cache or accessing the dashboard in an incognito/private window?\n\nIn the meantime, while the dashboard is unavailable, your team can still access task and project data directly through their respective views for your standup needs \u2014 I know it's not ideal, but it should help bridge the gap while we work on a fix.\n\nWe'll keep you updated as soon as we have more information. Thank you for your patience.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.91,
+      "flags": [
+        "llm_used",
+        "time-sensitive",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1348,
+        "output_tokens": 634,
+        "time_taken": 0.23985
+      }
+    },
+    {
+      "ticket_id": "EVAL-016",
+      "category": "billing",
+      "category_explanation": "The customer is inquiring about enterprise pricing tiers, features, and plan details. This aligns with the 'billing' category which covers plan changes, pricing, and seats/licenses. While there are elements of onboarding (migration, implementation), the primary ask is about enterprise pricing and features, matching the historical examples (TK-0142, TK-0310, TK-0288, TK-0438).",
+      "category_confidence": 0.7,
+      "priority": "high",
+      "priority_explanation": "This is a prospective enterprise customer with ~500 employees expressing serious buying intent after a conference interaction. Per the escalation rules, sensitive operations and enterprise-level inquiries warrant high priority. Additionally, the customer is currently on a Starter plan and is evaluating a significant upgrade, making this a high-value sales opportunity. The mention of data migration and implementation timeline suggests time-sensitivity for onboarding a new team.",
+      "priority_confidence": 0.8,
+      "response": "Hi there,\n\nThank you so much for reaching out, and it's great to hear you discovered Steadfast at the conference! We'd love to help Oakbridge Partners find the right solution for your project tracking needs.\n\nFor an organization of your size (~500 employees), our Enterprise plan would be an excellent fit. Here are some key highlights:\n\n- **Pricing:** Our Enterprise tier is $38/seat/month at 500+ seats, with volume discounts available depending on your specific needs.\n- **SLA:** 99.95% uptime SLA to keep your team running smoothly.\n- **Dedicated Support:** You'd receive a dedicated Customer Success Manager (CSM) and access to our priority support queue.\n- **Enterprise Features:** Advanced permissions, SSO/SAML integration, audit logs, and robust security controls designed for organizations like yours.\n\nRegarding your questions about **implementation timeline** and **data migration support** \u2014 we absolutely provide hands-on migration assistance to help you transition from spreadsheets and email-based workflows. Your dedicated CSM would work with you to build a tailored onboarding and rollout plan.\n\nI'd love to connect you with Sarah K. on our sales team, who specializes in enterprise engagements and can walk you through a more detailed pricing conversation, demo, and implementation roadmap tailored to Oakbridge Partners' logistics workflows.\n\nWould you be available for a call this week or next? Please let us know what works best for your schedule.\n\nLooking forward to helping you get started!\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.85,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1379,
+        "output_tokens": 644,
+        "time_taken": 0.332752
+      }
+    },
+    {
+      "ticket_id": "EVAL-017",
+      "category": "feature_request",
+      "category_explanation": "The customer is describing expected behavior (priority affecting sort order) that doesn't currently exist in the product. They explicitly ask 'is this a bug or does priority not affect sorting?' and then state 'if it doesn't, it should.' The system appears to be working as designed \u2014 priority is a metadata field but does not automatically change sort order. This is a suggestion for new functionality (automatic sorting by priority), which fits the feature_request category. There's no indication of broken functionality, errors, or unexpected behavior beyond a mismatch between the customer's expectations and the product's current design.",
+      "category_confidence": 0.72,
+      "priority": "low",
+      "priority_explanation": "This is a Starter plan customer with a general question about how priorities work, combined with a suggestion for improvement. There is no workflow-blocking issue, no data loss, no security concern, and no time-sensitive deadline mentioned. The customer can still use priority labels \u2014 they just don't auto-sort. This fits the 'low' priority guideline for suggestions for future features and 'nice to have' requests with no immediate urgency.",
+      "priority_confidence": 0.85,
+      "response": "Hi there,\n\nThank you for reaching out \u2014 that's a great question, and I completely understand the expectation!\n\nCurrently in Steadfast, priority levels (Critical, High, Medium, Low) are metadata labels that help you visually identify and filter tasks, but they do not automatically change the sort order of task lists. You can, however, manually sort or filter your views by priority to bring critical tasks to the top:\n\n- In any list or board view, look for the **Sort** or **Filter** options and select **Priority** as the sort field. This will arrange tasks with Critical items at the top.\n- You can also save this as a default view for your project so it persists for your team.\n\nThat said, your suggestion for priority levels to automatically influence sort order is a really valuable one \u2014 it's intuitive and something other customers have expressed interest in as well. I've logged this as a feature request with our product team for consideration.\n\nIn the meantime, using the sort/filter approach should give you the behavior you're looking for. If you need any help setting that up, don't hesitate to ask!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.75,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1413,
+        "output_tokens": 582,
+        "time_taken": 0.289848
+      }
+    },
+    {
+      "ticket_id": "EVAL-018",
+      "category": "feature_request",
+      "category_explanation": "The customer is suggesting new functionality ('I'd love to be able to assign colors to task labels') to improve the UI experience. This fits squarely into the feature_request category as it describes a missing feature / UI improvement.",
+      "category_confidence": 0.97,
+      "priority": "low",
+      "priority_explanation": "This is a 'nice to have' suggestion for a future feature with no immediate urgency or business-critical deadline mentioned. The customer is on a Growth plan with no indication of workflow blockage. Per guidelines, suggestions for future features with no immediate urgency are Low priority.",
+      "priority_confidence": 0.95,
+      "response": "Hi there,\n\nThank you for sharing this suggestion! Color-coded task labels is a great idea \u2014 we completely understand how visual distinction on the board view can make scanning and organizing tasks much more efficient.\n\nI've logged this as a feature request (FR) on your behalf so our product team can review and consider it for a future release. Requests like these directly influence our roadmap, so we really appreciate you taking the time to share your feedback.\n\nIn the meantime, a couple of tips that may help with visual scanning on the board view:\n- You can use **label naming conventions** (e.g., prefixing with an emoji or category abbreviation) to help differentiate labels at a glance.\n- If you're using a BI tool, you might also explore our **embedded analytics iframe option** to create custom visual dashboards that can help with task categorization and overview.\n\nWe'll be sure to keep you updated if color-coded labels become available. Thanks again for helping us make Steadfast better!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used"
+      ],
+      "usage": {
+        "input_tokens": 1337,
+        "output_tokens": 437,
+        "time_taken": 0.248001
+      }
+    },
+    {
+      "ticket_id": "EVAL-019",
+      "category": "billing",
+      "category_explanation": "The ticket concerns invoices being sent to the wrong email address and a billing profile update (email address) not taking effect. This falls squarely under billing: invoices, billing profile updates.",
+      "category_confidence": 0.97,
+      "priority": "medium",
+      "priority_explanation": "This is a billing profile issue affecting invoice delivery for a Growth plan customer. While it involves a billing profile update (which can be sensitive), the customer is not on an Enterprise plan, there is no data loss or security risk, and the issue is not blocking production. The customer has a clear workaround (they are still receiving invoices, just at the wrong address). However, the fact that the update was made three months ago and hasn't taken effect suggests a possible silent failure in the billing system, which nudges this toward medium rather than low. It doesn't rise to high because it's a single-customer, non-blocking issue with no immediate business-critical deadline mentioned.",
+      "priority_confidence": 0.8,
+      "response": "Hello Riverbend Manufacturing team,\n\nThank you for reaching out about this. I'm sorry for the inconvenience \u2014 your invoices should absolutely be going to the updated email address.\n\nI can see that situations like this can occur when a billing profile update doesn't fully propagate to the invoice delivery settings. I'm escalating this to our billing team to investigate why the email change to finance@quartz-data.com hasn't taken effect despite being updated three months ago.\n\nHere's what we'll do:\n\n1. **Investigate the root cause** \u2014 We'll check your billing profile to determine why the updated email isn't being used for invoice delivery and correct any misconfiguration.\n2. **Resend the last 3 invoices** \u2014 Once the correct email is confirmed and linked, we'll resend your most recent 3 invoices to finance@quartz-data.com.\n3. **Verify future delivery** \u2014 We'll confirm that all future invoices will be sent to the correct address going forward.\n\nA member of our billing team will follow up with you shortly once the investigation is complete. If you have any additional details or questions in the meantime, please don't hesitate to reply here.\n\nThank you for your patience!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "llm_used",
+        "sensitive-operation",
+        "silent-failure"
+      ],
+      "usage": {
+        "input_tokens": 1359,
+        "output_tokens": 577,
+        "time_taken": 0.251582
+      }
+    },
+    {
+      "ticket_id": "EVAL-020",
+      "category": "integration",
+      "category_explanation": "The customer is asking about setting up SCIM provisioning with Okta, which is a third-party identity provider integration involving SSO/directory sync. While SCIM touches on user management (account) and has security implications, the primary ask is about integrating an external system (Okta) with Steadfast for automated provisioning. Per the guidelines, SSO (Okta) falls under the integration category.",
+      "category_confidence": 0.8,
+      "priority": "high",
+      "priority_explanation": "This is an Enterprise customer requesting a sensitive administrative configuration (automated user provisioning/deprovisioning). Per the Strategic Escalation Rules: (1) Enterprise Impact \u2014 this affects user lifecycle management across the entire organization, (2) Sensitive Operations \u2014 automated provisioning and deprovisioning directly impacts access control and is high-stakes. Additionally, SCIM deprovisioning has security implications (ensuring departed employees lose access promptly). This warrants High priority.",
+      "priority_confidence": 0.9,
+      "response": "Hello Solace HR team,\n\nThank you for reaching out about SCIM provisioning with Okta \u2014 great to hear you're looking to automate your user lifecycle management in Steadfast!\n\nSCIM (System for Cross-domain Identity Management) is supported on the Enterprise plan, so you're all set to get started. Here's an overview of the setup process:\n\n1. **Enable SCIM in Steadfast:** Navigate to **Settings > Security > Identity & Provisioning** and enable SCIM provisioning. This will generate a SCIM endpoint URL and a Bearer token for authentication.\n\n2. **Configure Okta:** In your Okta admin console, add Steadfast as a SCIM application (or configure the existing Steadfast SSO app for provisioning). Enter the SCIM endpoint URL and Bearer token from Step 1.\n\n3. **Configure Provisioning Actions:** In Okta, enable the provisioning features you need:\n   - **Create Users** \u2014 Automatically create Steadfast accounts when users are assigned in Okta.\n   - **Deactivate Users** \u2014 Automatically revoke Steadfast access when users are unassigned or deactivated in your HR system/Okta.\n   - **Update User Attributes** \u2014 Sync profile changes (name, email, department) automatically.\n\n4. **Map Attributes:** Configure attribute mappings between Okta and Steadfast (e.g., department \u2192 team, role assignments). We recommend also setting up default permission groups so newly provisioned users receive appropriate access levels automatically.\n\n5. **Test:** Assign a test user in Okta and verify that their Steadfast account is created with the correct permissions. Then unassign them to confirm deprovisioning works as expected.\n\nI'd like to connect you with our Enterprise integrations team to walk through the setup together and ensure everything is configured correctly for your organization's needs, especially around permission group mappings and deprovisioning behavior.\n\nWould you be available for a brief setup call this week? In the meantime, I'll send over our detailed SCIM provisioning guide for Okta.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.82,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation"
+      ],
+      "usage": {
+        "input_tokens": 1453,
+        "output_tokens": 792,
+        "time_taken": 0.27336
+      }
+    },
+    {
+      "ticket_id": "EVAL-021",
+      "category": "performance",
+      "category_explanation": "The ticket describes a 504 timeout error when loading a large project view, with the request hanging for 30 seconds before failing. This is a classic performance issue involving database query timeouts and high latency, fitting squarely into the 'performance' category (slowness, lag, timeouts, 504 errors).",
+      "category_confidence": 0.97,
+      "priority": "critical",
+      "priority_explanation": "Multiple escalation factors apply: (1) 504 errors are explicitly listed as critical priority. (2) This is an Enterprise account, and the issue is blocking a core workflow (viewing their largest project). (3) The project is described as 'critical for Q2 planning,' indicating a business-critical deadline. (4) The issue is reliable/reproducible, meaning there is no workaround \u2014 the project is completely inaccessible. Per the guidelines, production-blocking 504 errors and business-critical deadlines warrant critical priority.",
+      "priority_confidence": 0.96,
+      "response": "Hello Arclight Gaming team,\n\nThank you for reporting this and for providing the detailed technical context \u2014 the specific endpoint (`/api/projects/PRJ-0042/tasks`) and the 30-second timeout behavior are very helpful for our investigation.\n\nWe understand this is blocking your Q2 planning work, and we're treating this as a critical priority issue.\n\nBased on similar cases we've resolved involving large dataset views, the root cause is often related to unoptimized database queries performing full table scans on projects with high task counts, particularly when custom field filters or complex widget configurations are involved. In past instances, we've addressed this by adding targeted database indexes and implementing caching layers to dramatically reduce load times.\n\nWe are escalating this to our engineering team immediately and will begin investigating the query performance for project PRJ-0042. Here's what we'll be looking at:\n\n1. **Database query analysis** \u2014 Identifying any full table scans or missing indexes on the tasks query for this project.\n2. **Caching opportunities** \u2014 Evaluating whether response caching can be applied to reduce repeated load times.\n3. **Payload optimization** \u2014 Checking whether the 2,000+ task payload can be paginated or lazy-loaded to avoid the 504 threshold.\n\nWe'll provide an initial update within the next few hours. In the meantime, if there are specific task subsets or filters you need access to urgently, please let us know and we can explore whether a filtered view of the project loads successfully as a temporary workaround.\n\nThank you for your patience, and we'll keep you closely updated.\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.95,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1413,
+        "output_tokens": 678,
+        "time_taken": 0.263035
+      }
+    },
+    {
+      "ticket_id": "EVAL-022",
+      "category": "feature_request",
+      "category_explanation": "The customer is requesting new functionality \u2014 task dependencies \u2014 that does not currently exist in the product. This aligns directly with the 'feature_request' category: 'Suggestions for new functionality, missing features, or UI improvements.' There is no indication of a bug, billing issue, or any other category.",
+      "category_confidence": 0.97,
+      "priority": "medium",
+      "priority_explanation": "This is a feature request with a clear use case and defined need, but no urgent deadline or business-critical timeline mentioned. The customer is on a Growth plan (not Enterprise), and they have a workaround in place (manual tracking via spreadsheet). Per the guidelines, feature requests with defined but non-urgent needs and available workarounds are classified as medium priority.",
+      "priority_confidence": 0.9,
+      "response": "Hi Greenfield Agriculture team,\n\nThank you for reaching out and for sharing such a clear description of your use case \u2014 task dependencies are a highly requested feature, and we completely understand how critical they are for managing sequential workflows in complex projects.\n\nI've logged this as a feature request on your behalf (we'll tag it internally for our product team's review). While task dependencies are not yet natively available in Steadfast, I want to make sure you're aware of a couple of interim options:\n\n1. **Zapier Integration:** We have a Zapier integration that can help automate some sequential task logic. For example, you can set up a Zap that triggers the creation or assignment of Task B when Task A is marked as complete. It's not a full dependency system, but it can reduce the manual tracking burden. We're happy to share a template to get you started.\n\n2. **API Automation:** If your team has technical resources, our API can be used to build lightweight dependency logic \u2014 for instance, listening for task completion webhooks and programmatically updating or unblocking downstream tasks.\n\nWe'll make sure your feedback is factored into our roadmap planning. If you'd like help setting up either of the workarounds above, just let us know and we'll walk you through it.\n\nThank you for helping us make Steadfast better!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1352,
+        "output_tokens": 557,
+        "time_taken": 0.252984
+      }
+    },
+    {
+      "ticket_id": "EVAL-023",
+      "category": "bug",
+      "category_explanation": "The customer describes a clear functional regression/broken behavior: dropdown options for custom fields are not persisting after save. This is unexpected behavior and a broken feature, fitting the 'bug' category.",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "This is a silent failure \u2014 the system appears to accept the input (options show in preview, field saves) but silently drops the dropdown options without any error message. Per the Silent Failures escalation rule, this should be at least High priority. Additionally, custom field configuration is a core workflow element, and the inability to create functional dropdown fields blocks the customer's ability to structure their data properly. The customer has also confirmed it's reproducible across multiple browsers, ruling out a client-side issue.",
+      "priority_confidence": 0.88,
+      "response": "Hi Crosswind Aviation team,\n\nThank you for reporting this issue and for the thorough troubleshooting \u2014 testing across multiple browsers helps us narrow things down significantly.\n\nWe can confirm this appears to be a bug where custom dropdown field options are not being persisted after saving, even though they display correctly in the preview. This is a known pattern of silent save failure, and we're treating it with high priority.\n\nOur engineering team is investigating the root cause now. Based on similar issues we've resolved in the past (such as silent failures in Blueprint provisioning and formula engine updates), this is likely related to the save/serialization step for dropdown option values.\n\nIn the meantime, here are a few things to note:\n- **Your custom field definitions are safe** \u2014 the fields themselves are saving correctly; it's specifically the dropdown options that aren't persisting.\n- We'll keep you updated as we identify the fix and will notify you as soon as a patch is deployed.\n\nIf you have any additional details \u2014 such as whether this affects all new dropdown fields or only specific ones, or if previously created dropdowns are also losing their options \u2014 that information would be very helpful for our investigation.\n\nWe appreciate your patience and will follow up shortly with an update.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.91,
+      "flags": [
+        "llm_used",
+        "silent-failure"
+      ],
+      "usage": {
+        "input_tokens": 1318,
+        "output_tokens": 531,
+        "time_taken": 0.270319
+      }
+    },
+    {
+      "ticket_id": "EVAL-024",
+      "category": "account",
+      "category_explanation": "This ticket is about transferring workspace ownership from one user to another, which falls squarely under 'account' (user management, roles, permissions, ownership transfers). This matches the historical examples TK-0012, TK-0702, TK-0221, and TK-0124 exactly.",
+      "category_confidence": 0.99,
+      "priority": "high",
+      "priority_explanation": "Per the Strategic Escalation Rules: 'Ownership transfers, billing updates, and security configurations are high-stakes and should be High priority.' Additionally, this is an Enterprise account, the customer is the sole owner-level user, they are leaving in one week (time-sensitive), and failure to complete the transfer could lock the entire organization out of owner-level access. While the time pressure and Enterprise impact could argue for critical, there is no current production outage or data loss \u2014 the risk is prospective. High is the appropriate classification.",
+      "priority_confidence": 0.92,
+      "response": "Hi there,\n\nThank you for reaching out and for planning this transition proactively \u2014 we want to make sure this goes smoothly for you and your team.\n\nTo complete the workspace ownership transfer to sarah.martinez@cirrus.io, here's the process we'll need to follow:\n\n1. **Written Authorization:** We'll need a written request from a company officer (this can be you as the current owner, or another authorized executive) confirming the transfer. I'll send over our ownership transfer request form shortly.\n\n2. **Domain Verification:** We'll verify that the new owner's email address (sarah.martinez@cirrus.io) matches or is authorized under your account's domain.\n\n3. **Transfer & Security Steps:** Once verified, we'll complete the ownership transfer to Sarah. As a security precaution, all existing API keys will be regenerated upon completion of the transfer, so please coordinate with your team to update any active integrations afterward.\n\n4. **Account Deactivation:** After the transfer is complete, we can proceed with deactivating your account. We recommend completing the transfer well before your departure date to allow time for Sarah to confirm access and for any API key updates to be applied.\n\nGiven that you're the sole owner and are departing next week, I'd recommend we get started on this right away. I'm sending the ownership transfer form to your email now \u2014 please complete and return it at your earliest convenience.\n\nIs there anything else you'd like us to coordinate as part of this transition?\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.96,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1342,
+        "output_tokens": 638,
+        "time_taken": 0.275306
+      }
+    },
+    {
+      "ticket_id": "EVAL-025",
+      "category": "billing",
+      "category_explanation": "The customer is asking about seat-based billing charges, requesting deactivation of unused seats, and inquiring about prorated credits and usage-based billing options. This falls squarely under billing (invoices, charges, refunds, seats/licenses, plan changes).",
+      "category_confidence": 0.97,
+      "priority": "medium",
+      "priority_explanation": "This is a billing inquiry about optimizing seat usage and requesting a credit. While it involves billing (a sensitive area), the customer is not reporting an error or overcharge \u2014 they are asking about policy and requesting an adjustment. There is no urgency cue, no business-critical deadline, and no indication of a billing error. This is a standard billing optimization request from a Growth plan customer affecting a single account. It does not meet the threshold for High under sensitive operations since it's a seat adjustment rather than an ownership transfer or critical billing update.",
+      "priority_confidence": 0.75,
+      "response": "Hi Summit Legal Group,\n\nThank you for reaching out \u2014 that's a great question, and we completely understand wanting to optimize your costs.\n\nSteadfast's billing is seat-based, meaning you're charged for the number of provisioned seats on your account regardless of login activity. However, you absolutely can deactivate inactive user accounts to reduce your seat count and lower your bill going forward.\n\nHere's how to get started:\n\n1. **Deactivate inactive users:** An admin on your account can go to **Settings > User Management** and deactivate any users who no longer need access. Deactivated users will lose access but their data (tasks, comments, etc.) will be preserved.\n\n2. **Prorated credit:** Once you reduce your seat count, your next invoice will be adjusted on a prorated basis to reflect the lower number of seats for the remainder of your billing cycle. I've flagged your account for our billing team to review and confirm the credit amount once the changes are made.\n\n3. **Active-user billing:** Currently, our Growth plan uses a per-seat model rather than active-user billing. I'll note your feedback about usage-based pricing \u2014 it's valuable input for our product team.\n\nIf you'd like, I can also generate a usage report showing login activity across your 75 seats so you can make informed decisions about which accounts to deactivate.\n\nPlease let me know if you have any questions or if you'd like assistance with the deactivation process!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.9,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1376,
+        "output_tokens": 620,
+        "time_taken": 0.281049
+      }
+    },
+    {
+      "ticket_id": "EVAL-026",
+      "category": "account",
+      "category_explanation": "The customer is asking about data retention after cancellation, data export options, and reactivation policies. This falls squarely under account management (data retention, data exports, plan changes). Similar to historical tickets TK-0153, TK-0324, TK-0411, TK-0458 which all deal with data retention questions around plan changes.",
+      "category_confidence": 0.95,
+      "priority": "low",
+      "priority_explanation": "This is a general informational inquiry from a Starter plan customer. There is no immediate urgency, no blocking issue, no security concern, and no business-critical deadline mentioned. The customer is in an evaluation phase and seeking information before making a decision. Per guidelines, general 'how-to' and informational questions with no immediate urgency are Low priority. Historical precedent (TK-0324, TK-0458) also shows similar data retention questions classified as Low priority.",
+      "priority_confidence": 0.85,
+      "response": "Hi there,\n\nThank you for reaching out, and I'm happy to help clarify what happens to your data if you decide to cancel your Steadfast account.\n\nHere's a summary of our data retention and cancellation policies:\n\n**Data Retention After Cancellation:**\nAfter cancellation, your data is retained for a limited period to allow for potential reactivation. During this retention window, your workspace data (projects, tasks, custom fields, etc.) is preserved but inaccessible until reactivation.\n\n**Data Export Before Cancellation:**\nAbsolutely \u2014 we strongly recommend exporting all of your data before cancelling as a safety measure. You can export your projects, tasks, and associated data from your workspace settings. This ensures you have a complete local copy regardless of what you decide.\n\n**Reactivation:**\nIf you choose to reactivate within the data retention period, your data should still be available. However, I'd recommend treating the export as your primary backup, as retention timelines can vary.\n\nTo get started with your export, navigate to **Workspace Settings \u2192 Data Export** and you'll be able to download a full copy of your workspace data.\n\nIf you'd like, I can also send over a detailed comparison document that outlines exactly what's impacted at each plan level, including any limits on archived projects, custom fields, and integrations \u2014 this may be helpful as you evaluate your options.\n\nPlease don't hesitate to reach out if you have any additional questions. We're here to help you make the best decision for your team.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.82,
+      "flags": [
+        "data-loss-risk",
+        "llm_used"
+      ],
+      "usage": {
+        "input_tokens": 1398,
+        "output_tokens": 651,
+        "time_taken": 0.250959
+      }
+    },
+    {
+      "ticket_id": "EVAL-027",
+      "category": "bug",
+      "category_explanation": "Files attached to tasks are silently disappearing after ~24 hours. This is clearly broken/unexpected behavior \u2014 a functional regression or bug where uploaded files are being deleted without user action or error messaging. Matches 'bug' category for broken features and unexpected behavior.",
+      "category_confidence": 0.97,
+      "priority": "critical",
+      "priority_explanation": "This is a data loss scenario \u2014 files are silently disappearing without any error message, which constitutes a silent failure. Per the Strategic Escalation Rules, silent failures where the system fails without an error message (data disappearing) are high risk and should be at least High. However, the customer is actively losing important project deliverables (data loss), this has happened 4 times in one week across multiple file types indicating a systemic issue, and the classification guidelines specify 'data loss (including silent failures)' as critical. Escalating to Critical.",
+      "priority_confidence": 0.93,
+      "response": "Hi Fathom AI team,\n\nThank you for reporting this \u2014 I understand how concerning it is to have important project deliverables disappearing from your tasks, and I want to assure you this is being treated as a critical priority.\n\nWhat you're describing \u2014 attachments silently vanishing after approximately 24 hours with the attachment count dropping to zero \u2014 points to a potential issue with our file storage retention or a cleanup process that may be incorrectly targeting active attachments. We've seen related file upload issues in the past (such as silent failures with our upload proxy), and this may be connected to a similar backend configuration problem.\n\nI've escalated this to our engineering team for immediate investigation. To help us diagnose this faster, could you provide:\n\n1. **Task IDs or URLs** for any tasks where attachments have disappeared\n2. **Approximate upload times** for the most recent affected files\n3. **Approximate times** when you noticed the files were gone\n4. **File sizes** of the affected uploads (particularly if any were over 10MB)\n5. **How the files were uploaded** \u2014 via the web app, mobile, or API\n\n**In the meantime, as a precaution**, I'd recommend keeping local copies of any critical deliverables you upload to tasks until we've resolved this issue. We understand this is not an acceptable workaround, but want to ensure no further data is lost while we investigate.\n\nWe'll keep you updated as our team digs into this. Expect an initial update within the next few hours.\n\nThank you for your patience, and I'm sorry for the disruption to your workflow.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "data-loss-risk",
+        "llm_used",
+        "silent-failure",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1370,
+        "output_tokens": 668,
+        "time_taken": 0.248399
+      }
+    },
+    {
+      "ticket_id": "EVAL-028",
+      "category": "security",
+      "category_explanation": "The customer reports unauthorized access from an unrecognized location with an active session they don't recognize. This is a clear security concern involving suspicious activity and potential unauthorized access, matching the 'security' category definition (suspicious activity, unauthorized access).",
+      "category_confidence": 0.98,
+      "priority": "critical",
+      "priority_explanation": "This is a potential security breach with confirmed unauthorized session access from an unknown location. Per the classification guidelines, security breaches are critical priority. The customer has already observed an unrecognized active session, indicating confirmed unauthorized access rather than a false alarm. This aligns with TK-0455 (potential data breach/unauthorized access) which was also classified as critical.",
+      "priority_confidence": 0.95,
+      "response": "Dear Coppervale Mining team,\n\nThank you for reporting this immediately \u2014 we take unauthorized access very seriously and are treating this as a critical security incident.\n\nWe're glad you've already changed your password. Here are the immediate steps we're taking and recommend:\n\n**Immediate Actions (Our Side):**\n1. We are escalating this to our Tier 2 security team right now for urgent investigation.\n2. We will revoke all active sessions on your account to terminate the unrecognized session immediately.\n3. We will pull access logs associated with your account, including details on the suspicious IP address from San Francisco, to determine what was accessed and when.\n\n**Recommended Actions (Your Side):**\n1. **Enable MFA/2FA** on your account if not already enabled \u2014 this will add a critical layer of protection going forward.\n2. **Review your account activity** for any changes to settings, data exports, or workspace configurations that you did not authorize.\n3. **Check for any connected integrations or API keys** that may have been added or modified during the unauthorized session.\n4. If you use the same password on other services, please change those as well, as the credentials may have been compromised externally (e.g., via phishing).\n\nOur security team will follow up shortly with a detailed analysis of the access logs, including what data or areas of your account were accessed during the unauthorized session. We'll also provide guidance on any additional protective measures specific to your workspace.\n\nPlease don't hesitate to reply to this ticket if you notice anything else unusual in the meantime.\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.95,
+      "flags": [
+        "data-loss-risk",
+        "llm_used",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1408,
+        "output_tokens": 607,
+        "time_taken": 0.271805
+      }
+    },
+    {
+      "ticket_id": "EVAL-029",
+      "category": "integration",
+      "category_explanation": "The ticket describes 429 rate-limiting errors on a specific API endpoint (/v2/analytics), which falls squarely under API/integration issues. This aligns with multiple historical examples (TK-0152, TK-0139, TK-0329, TK-0474) that classify similar 429 API errors as integration issues.",
+      "category_confidence": 0.95,
+      "priority": "high",
+      "priority_explanation": "The customer reports that their analytics dashboard is broken due to this issue, making it a workflow-blocking problem. They are on a Growth plan and their stated request rate (20 req/min) is well under the expected limit (100 req/min for Growth), suggesting a possible backend issue or misconfiguration on Steadfast's side rather than customer overuse. This is not a total production outage (not critical), but it is actively blocking a core daily workflow (analytics dashboard). Historical precedent (TK-0152) shows similar endpoint-specific rate limit issues were classified as high priority and traced to backend migrations.",
+      "priority_confidence": 0.85,
+      "response": "Hi Sparrow Telecom team,\n\nThank you for reaching out about the 429 errors on the /v2/analytics endpoint. I'm sorry this is disrupting your analytics dashboard.\n\nYou're correct that 20 requests per minute should be well within the rate limits for your Growth plan (100 req/min). We've seen similar behavior in the past where endpoint-specific rate limits were inadvertently reduced during backend migrations or maintenance windows. Given that this started 2 days ago and other endpoints are unaffected, this is very likely the case here.\n\nI'm escalating this to our engineering team to investigate the /v2/analytics endpoint specifically. In the meantime, here are a couple of things that may help:\n\n1. **Retry with backoff:** If you haven't already, implementing exponential backoff on 429 responses can help your sync complete even with the reduced limits.\n2. **Webhook alternative:** If your use case allows, we can help you explore using webhooks for real-time analytics events, which would reduce your dependency on polling the endpoint.\n\nWe'll keep you updated as we investigate. Our goal is to restore normal rate limits on this endpoint as quickly as possible. Could you share any additional details, such as the exact error response body or headers you're receiving? That will help us pinpoint the issue faster.\n\nThank you for your patience, and we'll follow up shortly.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.9,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1402,
+        "output_tokens": 638,
+        "time_taken": 0.24141
+      }
+    },
+    {
+      "ticket_id": "EVAL-030",
+      "category": "bug",
+      "category_explanation": "The customer reports that global search intermittently returns zero results for terms that are known to exist. This is unexpected/broken behavior \u2014 a functional regression or reliability issue with the search feature, which fits the 'bug' category (broken features, errors, unexpected behavior).",
+      "category_confidence": 0.92,
+      "priority": "medium",
+      "priority_explanation": "This is an intermittent bug affecting a single user on a Growth plan. The search does work sometimes, meaning there is a partial workaround (retrying). It is not a total feature failure, not affecting multiple users on an Enterprise plan, and there is no data loss or security concern. Per guidelines, intermittent bugs with available workarounds are medium priority.",
+      "priority_confidence": 0.85,
+      "response": "Hi there,\n\nThank you for reaching out, and I'm sorry for the frustration with the global search returning inconsistent results.\n\nWhat you're describing \u2014 intermittent zero-result responses for terms that do exist \u2014 is consistent with a known class of issues related to our search indexing service. In past cases, this has been caused by the search index becoming temporarily out of sync or the Elasticsearch cluster experiencing transient load or disk space issues.\n\nHere's what we're going to do:\n\n1. **Immediate investigation:** I'm escalating this to our backend team to check the health of the search indexing service and the Elasticsearch cluster for your workspace.\n2. **Index rebuild:** If needed, we'll trigger a search index rebuild (reindex) for your workspace, which has resolved similar issues in the past.\n3. **Monitoring:** We'll add monitoring to detect if this recurrence is tied to a specific pattern (e.g., time of day, data volume spikes).\n\nIn the meantime, if you encounter zero results, waiting a moment and retrying the search may return the expected results, as the issue appears to be transient.\n\nWe'll follow up with you once we've completed our investigation. Thank you for your patience!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.9,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1377,
+        "output_tokens": 525,
+        "time_taken": 0.294314
+      }
+    },
+    {
+      "ticket_id": "EVAL-031",
+      "category": "onboarding",
+      "category_explanation": "The customer is a new team that just signed up and is asking for help with initial workspace setup, which directly matches the 'onboarding' category definition: 'Setup help for new teams, how to questions, best practices, getting started.' This aligns perfectly with multiple historical examples (TK-0226, TK-0448, TK-0650, TK-0673) all classified as onboarding.",
+      "category_confidence": 0.99,
+      "priority": "high",
+      "priority_explanation": "Per the Strategic Escalation Rule #2: 'Onboarding/Migration: Initial setup and data migrations are time-sensitive blockers for new customers; treat these as High priority.' This is a new customer with a 15-person team needing initial setup guidance, making it a time-sensitive onboarding blocker. While historical examples for similar subjects were classified as medium/low, those escalation rules explicitly instruct us to treat onboarding for new teams as High.",
+      "priority_confidence": 0.88,
+      "response": "Hi there, and welcome to Steadfast! \ud83c\udf89\n\nWe're thrilled to have Cirrus Cloud Inc. and your marketing team on board. Setting up a workspace for 15 people with 5 ongoing campaigns is a great use case, and we'd love to help you get started on the right foot.\n\nHere's our recommended setup sequence based on our Admin Onboarding Checklist (KB-1001):\n\n1. **Configure Workspace Settings** \u2014 Set your workspace name, timezone, and notification preferences.\n2. **Set Up Permission Groups** \u2014 Define roles for your team (e.g., Campaign Managers, Contributors, Viewers) so everyone has the right level of access.\n3. **Create Project Templates** \u2014 Since you have 5 ongoing campaigns, we recommend creating a campaign project template with task lists for common stages (planning, execution, review, launch). This way you can quickly spin up new campaigns with a consistent structure.\n4. **Invite a Pilot Group (5\u201310 users)** \u2014 Start by inviting a smaller group of your team to test the setup, create a few tasks with deadlines and assignees, and provide feedback.\n5. **Run a Pilot for ~1 Week** \u2014 Let the pilot group work through real tasks to validate your workspace structure.\n6. **Full Rollout** \u2014 Once you're confident in the setup, invite the remaining team members.\n\nFor tracking tasks, deadlines, and ownership across your campaigns, you'll want to leverage task assignments and due dates within each project \u2014 this gives you clear visibility into who's responsible for what and when things are due.\n\nWe'd also love to offer you a **free onboarding call** with our Customer Success team to walk through your specific setup and answer any questions live. Would you like us to schedule one? Just let us know a few times that work for your team.\n\nLooking forward to helping you get the most out of Steadfast!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used",
+        "onboarding-blocker",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1519,
+        "output_tokens": 753,
+        "time_taken": 0.30783
+      }
+    },
+    {
+      "ticket_id": "EVAL-032",
+      "category": "billing",
+      "category_explanation": "The customer is asking about seat-based billing, specifically whether guest/limited users count toward their seat limit and whether there is separate guest pricing. This is fundamentally a billing/pricing question about how seats and charges work, even though it touches on user management concepts.",
+      "category_confidence": 0.85,
+      "priority": "low",
+      "priority_explanation": "This is a general inquiry/how-to question about billing and guest seat pricing. There is no urgency cue, no workflow blocker, no deadline mentioned, and no indication of a problem. The customer is on a Growth plan (not Enterprise), and this is an informational question. Per guidelines, general questions with no immediate urgency are Low priority.",
+      "priority_confidence": 0.85,
+      "response": "Hi Tundra Analytics team,\n\nGreat question \u2014 thank you for reaching out!\n\nCurrently on the Growth plan, guest users do count toward your overall seat limit, so adding contractors as guests would incur the standard per-seat charge. There isn't a separate guest-specific pricing tier on the Growth plan at this time.\n\nThat said, here are a couple of options to consider:\n\n1. **Permission Groups for Limited Access:** You can add contractors and assign them to a restricted permission group that grants access only to specific projects, without exposing billing, admin settings, or the broader workspace. You can set this up under **Settings > Team** and create a custom permission group (e.g., 'Contractor-Limited') with scoped project access. This way, even though they occupy a seat, their access is tightly controlled.\n\n2. **Seat Management:** If you're looking to manage costs, you can add and remove contractor seats as needed throughout your billing cycle. Seats can be adjusted at any time, and charges are typically prorated.\n\n3. **Plan Comparison:** If external collaboration is a significant part of your workflow, it may be worth reviewing whether a higher-tier plan offers more favorable guest or external user pricing. I'd be happy to walk you through the options.\n\nWould you like me to help you set up a restricted permission group for your contractors, or would you prefer to discuss plan options that might better fit your collaboration needs? Just let me know!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.78,
+      "flags": [
+        "llm_used"
+      ],
+      "usage": {
+        "input_tokens": 1362,
+        "output_tokens": 563,
+        "time_taken": 0.494901
+      }
+    },
+    {
+      "ticket_id": "EVAL-033",
+      "category": "bug",
+      "category_explanation": "The customer reports that automated workflow rules work for regular tasks but fail to trigger for subtasks, despite subtasks having the same statuses and workflow transitions. This is unexpected behavior / a functional regression where a feature doesn't work consistently across task types, fitting the 'bug' category (broken features, unexpected behavior).",
+      "category_confidence": 0.82,
+      "priority": "medium",
+      "priority_explanation": "This is an intermittent/scoped bug affecting a specific subset of items (subtasks) rather than all tasks. The customer is on a Growth plan (not Enterprise), and while it impacts their workflow, the automation does work for regular tasks, providing a partial workaround. No data loss, security, or production-down indicators are present. Per guidelines, this fits 'medium' \u2014 a bug with confusing behavior affecting a defined scope with a potential workaround (restructuring subtasks as regular tasks or manually notifying).",
+      "priority_confidence": 0.8,
+      "response": "Hi Goldleaf Digital team,\n\nThank you for reporting this and for the detailed description \u2014 it's very helpful.\n\nYou're correct that this appears to be a gap in how our automation engine evaluates subtask status transitions. Currently, automated workflow rules (including Slack notification triggers) are scoped to top-level tasks, and subtask status changes may not be picked up by the rule evaluation engine even though subtasks do support the same workflow statuses.\n\nHere's what we're doing and what you can do in the meantime:\n\n1. **Bug Filed:** I'm escalating this to our engineering team as a confirmed behavioral inconsistency so that subtask transitions are properly evaluated by the automation rules engine.\n\n2. **Workaround:** In the interim, you have a couple of options:\n   - **Promote critical subtasks to regular tasks** where the Slack notification is essential, so they are picked up by the existing rule.\n   - **Use a Zapier/webhook-based integration** to listen for subtask status changes and route Slack notifications that way. If you'd like help setting this up, just let us know \u2014 we're happy to walk you through it.\n\n3. **Tracking:** I'll make sure you're notified when a fix is shipped so your existing rule will work seamlessly for both tasks and subtasks.\n\nWe appreciate you flagging this \u2014 it helps us improve the platform for everyone. Please don't hesitate to reach out if you have any questions or need help with the workaround.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.8,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1420,
+        "output_tokens": 635,
+        "time_taken": 0.332623
+      }
+    },
+    {
+      "ticket_id": "EVAL-034",
+      "category": "feature_request",
+      "category_explanation": "The customer is requesting new functionality (calendar view) that does not currently exist in the product. This aligns with the feature_request category: 'Suggestions for new functionality, missing features, or UI improvements.' The customer explicitly states they 'really miss having a calendar view' and describes a workaround (exporting to Google Calendar), confirming this is a missing feature rather than a bug or integration issue.",
+      "category_confidence": 0.97,
+      "priority": "medium",
+      "priority_explanation": "While this is an Enterprise customer with a team of 60, the request is for a new feature with no defined urgent deadline. The customer has a functional workaround (Google Calendar export), which reduces urgency. Per the priority guidelines, feature requests with no immediate urgency and available workarounds fall under medium. The Enterprise plan and team size were considered for potential escalation, but since this is a quality-of-life improvement rather than a workflow blocker, medium is appropriate.",
+      "priority_confidence": 0.82,
+      "response": "Hi RapidScale Systems team,\n\nThank you for sharing this feedback \u2014 a calendar view for tasks by due date is one of our most frequently requested features, and we completely understand how valuable it would be for a team of your size.\n\nI'm happy to let you know that enhanced view options, including calendar-based layouts, are actively being evaluated by our product team. I've added your request and your team's details to our internal feature tracker to ensure your use case is represented in the planning process.\n\nIn the meantime, in addition to the Google Calendar export you're currently using, you may also want to explore our API to set up a more streamlined sync with Google Calendar or other calendar tools. We have third-party integrations available through our API that some teams have found helpful for bridging this gap \u2014 I'd be happy to share more details if you're interested.\n\nWe'll make sure to notify you as soon as a calendar view becomes available in beta or general release. We truly appreciate your continued use of Steadfast and your thoughtful input on how we can improve.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1393,
+        "output_tokens": 540,
+        "time_taken": 0.281799
+      }
+    },
+    {
+      "ticket_id": "EVAL-035",
+      "category": "integration",
+      "category_explanation": "The customer is asking about API authentication for a server-to-server connection to their Snowflake data warehouse. This involves API usage and third-party integration, which falls squarely under the 'integration' category.",
+      "category_confidence": 0.85,
+      "priority": "high",
+      "priority_explanation": "This is an Enterprise customer who is new to the platform (onboarding context) and is trying to set up a core data integration for their BI dashboards. Per the escalation rules: (1) Enterprise Impact \u2014 this affects their core workflow/productivity, and (2) Onboarding/Migration \u2014 initial setup and integrations are time-sensitive blockers for new customers. Both rules justify High priority.",
+      "priority_confidence": 0.9,
+      "response": "Hi Harborview Insurance team,\n\nThank you for reaching out, and welcome to Steadfast! We're glad to help you get your Snowflake data warehouse integration up and running.\n\nFor server-to-server connections like pushing task completion data to your BI dashboards, you'll want to use our **API key-based authentication** rather than OAuth, as it's designed specifically for non-interactive, backend service connections. Here's how to get started:\n\n1. **Generate a Service API Key:** In your Steadfast workspace, navigate to **Settings \u2192 API & Integrations \u2192 API Keys**. Create a new key with the appropriate scopes (you'll likely need at least `tasks:read` and `projects:read` for task completion data).\n2. **Authenticate Requests:** Include the API key in the `Authorization` header of your requests as a Bearer token: `Authorization: Bearer <your-api-key>`.\n3. **Relevant Endpoints:** Our REST API provides endpoints for retrieving task completion data that you can use to push to Snowflake. The full API reference is available at **docs.steadfast.io/api**, including our Authentication guide and rate limiting details.\n4. **SDKs Available:** We offer SDKs for Python, Node.js, and Ruby that can simplify the integration \u2014 our **Getting Started with the API** tutorial (KB-1050) walks through the basics.\n\nAs an Enterprise customer, you also have access to our developer support resources. I'd recommend joining our **developer Slack community** where our integration engineers can assist with more specific questions about your Snowflake pipeline setup.\n\nSince you're new to the platform, I'd also like to offer to connect you with our onboarding team to ensure your overall setup goes smoothly. Would a brief call to walk through your integration architecture be helpful?\n\nPlease don't hesitate to reach out with any follow-up questions!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.82,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "onboarding-blocker"
+      ],
+      "usage": {
+        "input_tokens": 1475,
+        "output_tokens": 685,
+        "time_taken": 0.300286
+      }
+    },
+    {
+      "ticket_id": "EVAL-036",
+      "category": "integration",
+      "category_explanation": "The ticket contains multiple issues spanning integration (Jira sync failure), account (admin panel access), and bug (timeline sorting). However, the customer explicitly states the Jira sync failure is the most urgent issue and it's the primary blocker affecting their engineering team. The integration failure with 200+ unsynced issues represents the highest-impact problem and should drive the primary categorization. The other issues will be addressed in the response and may warrant separate tickets.",
+      "category_confidence": 0.7,
+      "priority": "critical",
+      "priority_explanation": "Multiple factors escalate this to critical: 1) Enterprise plan with multiple concurrent issues affecting multiple users and core workflows (Enterprise Impact rule). 2) The Jira sync has been silently failing for 3 days with 200+ unsynced issues \u2014 this is a silent failure with data sync loss risk, and the engineering team is described as 'flying blind', indicating a production-impacting workflow blocker. 3) Admin panel access failure is blocking team leads from performing administrative duties (PTO approvals), compounding the workflow disruption. The combination of silent sync failure, multi-user enterprise impact, and multiple simultaneous system failures warrants critical priority.",
+      "priority_confidence": 0.92,
+      "response": "Hello Peakline Software team,\n\nThank you for reaching out, and I'm sorry you're dealing with multiple issues simultaneously. I understand the urgency, especially with your Jira sync being down for 3 days. Let me address each concern:\n\n**1. Jira Integration Sync Failure (Highest Priority)**\nWith 200+ unsynced issues over 3 days, I'm escalating this immediately to our integration engineering team. In the meantime, could you please check the following:\n- Navigate to **Settings > Integrations > Jira** and verify the connection status. Look for any error indicators or a \"Reconnect\" prompt.\n- Confirm that your Jira API token or OAuth credentials haven't expired \u2014 sometimes Atlassian rotates tokens or sessions expire after security updates.\n- Check if the Steadfast Jira plugin in your Atlassian Marketplace is up to date.\n\nOur team will investigate the sync pipeline on our end to identify what caused the failure and work to replay the 200+ unsynced issues once connectivity is restored. We'll keep you updated on progress.\n\n**2. Admin Panel Access for Team Leads**\nEven though your team leads have admin roles assigned, there are a couple of things to verify:\n- Under **Settings > Members**, confirm their roles show as \"Admin\" (not a custom role that may be missing specific admin panel permissions).\n- If you're using SSO (e.g., Okta), role mappings may have been overridden during a recent sync. Try re-saving their role assignments.\n- As a quick test, have them try accessing the admin panel in an incognito/private browser window to rule out caching issues.\n\nIf the issue persists after these checks, I'll escalate this to our account engineering team for deeper investigation.\n\n**3. Timeline View Sorting Issue**\nI've logged this as a bug \u2014 the project timeline view should default to sorting by due date. As a temporary workaround, you may be able to manually change the sort order by clicking the sort/filter options within the timeline view header. We'll investigate whether this is a recent regression.\n\nGiven the scope and impact across your Enterprise workspace, I've flagged this ticket as critical and our team will be prioritizing the Jira sync restoration. You can expect an update within the next few hours.\n\nPlease don't hesitate to reply with any additional details or if anything changes.\n\nBest regards,\nSteadfast Support Team",
+      "confidence": 0.85,
+      "flags": [
+        "data-loss-risk",
+        "enterprise-impact",
+        "llm_used",
+        "silent-failure",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1522,
+        "output_tokens": 933,
+        "time_taken": 0.492122
+      }
+    },
+    {
+      "ticket_id": "EVAL-037",
+      "category": "account",
+      "category_explanation": "The ticket involves user management tasks: deactivating user accounts, reassigning tasks, and managing team membership. This falls squarely under the 'account' category which covers user management, roles, permissions, and workspace settings.",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "This involves sensitive administrative operations (deactivating accounts and reassigning ownership of tasks/data), which qualifies as a sensitive operation per escalation rules. Additionally, former employees retaining active accounts for over a month carries implicit security risk (unauthorized access potential), and there is a data-loss risk concern since the customer explicitly wants to preserve project data during deactivation. These factors together warrant High priority.",
+      "priority_confidence": 0.85,
+      "response": "Hi Steelbridge Consulting team,\n\nThank you for reaching out \u2014 we'll be happy to walk you through the process of deactivating those former employee accounts and ensuring all project data is preserved.\n\nHere's an overview of the steps:\n\n**Bulk Deactivation:**\n1. Navigate to **Settings > Team** in your workspace.\n2. You can select multiple users and use the bulk action menu to deactivate them. This will revoke their access immediately while retaining all of their historical data, comments, and contributions within your workspace.\n\n**Reassigning Tasks:**\n3. Before or after deactivation, you can reassign tasks owned by these users. Go to each user's profile or use the task filter to view all tasks assigned to them, then bulk-reassign to active team members.\n4. We recommend completing the task reassignment before deactivation for the smoothest workflow, though tasks can also be reassigned after accounts are deactivated.\n\n**Data Preservation:**\nRest assured \u2014 deactivating a user account does **not** delete any of their project data, files, or history. All work products remain intact and accessible to your active team members. Deactivation simply removes their ability to log in and access the workspace.\n\nAdditionally, since these employees left last month, I'd recommend reviewing their recent activity logs (available under **Settings > Team > [User] > Activity**) to ensure nothing needs immediate attention.\n\nIf you'd like, I can also help you review your current seat count to ensure your billing reflects the updated team size after deactivation \u2014 just let me know.\n\nPlease don't hesitate to reach out if you run into any issues during the process or need further guidance!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "data-loss-risk",
+        "llm_used",
+        "sensitive-operation",
+        "time-sensitive"
+      ],
+      "usage": {
+        "input_tokens": 1364,
+        "output_tokens": 644,
+        "time_taken": 0.287756
+      }
+    },
+    {
+      "ticket_id": "EVAL-038",
+      "category": "account",
+      "category_explanation": "The customer is asking a general 'how-to' question about finding storage usage information within their workspace settings. This falls under account/workspace settings inquiries rather than billing, bug, or any other category.",
+      "category_confidence": 0.92,
+      "priority": "low",
+      "priority_explanation": "The customer explicitly states this is 'not urgent at all' and is asking a simple informational question. There is no workflow blocker, no data loss risk, and no time-sensitive element. Despite being an Enterprise customer, this is a straightforward inquiry with no impact on productivity or operations, so no escalation is warranted.",
+      "priority_confidence": 0.95,
+      "response": "Hi Quartz Data team,\n\nGreat question! You can view your workspace's storage usage by navigating to **Settings > Workspace > Usage & Storage**. This section provides a breakdown of your current storage consumption, including files and attachments, along with your plan's storage limits.\n\nAs an Enterprise workspace, you have a generous storage allocation, but it's always smart to keep an eye on it. If you'd like a more detailed breakdown or have any questions about your limits, feel free to reach out anytime.\n\nLet us know if there's anything else we can help with!",
+      "confidence": 0.82,
+      "flags": [
+        "llm_used"
+      ],
+      "usage": {
+        "input_tokens": 1351,
+        "output_tokens": 333,
+        "time_taken": 0.19674
+      }
+    },
+    {
+      "ticket_id": "EVAL-039",
+      "category": "integration",
+      "category_explanation": "The ticket describes a GitHub integration sync failure with an authentication error ('token expired'). This clearly falls under the integration category, which covers third-party apps, API issues, and sync failures.",
+      "category_confidence": 0.98,
+      "priority": "high",
+      "priority_explanation": "The sync failure is blocking the dev team's workflow \u2014 they rely on linked PRs showing up on tasks, making this a workflow-blocking issue. Additionally, this appears to be a silent/unexpected failure (the customer hasn't changed anything, and the token expired without warning), which per the Silent Failures escalation rule warrants at least High priority. While the customer is on a Growth plan (not Enterprise), the team-wide workflow impact and the pattern matching known Salesforce OAuth token refresh issues (TK-0709, TK-0034) suggest this is a connector-side issue requiring prompt attention.",
+      "priority_confidence": 0.88,
+      "response": "Hi Maplewood Health team,\n\nThank you for reaching out about the GitHub integration sync failure. I'm sorry for the disruption to your dev team's workflow.\n\nThe 'Authentication failed: token expired' error you're seeing is consistent with a pattern we've observed with third-party integrations where the OAuth token refresh flow encounters issues \u2014 sometimes due to changes on the provider side or token lifecycle expiration. Since you haven't made any changes on your end, this is likely something we can resolve on our side.\n\nHere's what we're doing and what you can try in the meantime:\n\n1. **Immediate workaround:** Please try disconnecting and reconnecting the GitHub integration from your Steadfast integration dashboard. This will generate a fresh OAuth token and may restore the sync immediately.\n2. **On our end:** I'm escalating this to our integrations team to investigate whether there's been a change in the GitHub OAuth token refresh flow that's affecting our connector. We've seen similar patterns with other integrations (e.g., Salesforce's Spring '25 update) where deprecated token endpoints caused sync failures.\n3. **Once resolved:** We'll trigger a full resync to ensure all PRs and linked activity are caught up on your tasks, and we'll add monitoring to detect sync staleness earlier going forward.\n\nI'll keep you updated as our team investigates. If the reconnection workaround doesn't resolve the issue, please let me know and we'll prioritize a deeper dive.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.92,
+      "flags": [
+        "llm_used",
+        "silent-failure",
+        "time-sensitive",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1367,
+        "output_tokens": 619,
+        "time_taken": 0.312855
+      }
+    },
+    {
+      "ticket_id": "EVAL-040",
+      "category": "bug",
+      "category_explanation": "The customer reports that PDF exports produce low-resolution/pixelated charts, while the on-screen rendering is fine. This is unexpected behavior in the export functionality \u2014 a functional regression or rendering quality issue in the PDF export pipeline. This fits the 'bug' category (broken features, unexpected behavior).",
+      "category_confidence": 0.92,
+      "priority": "medium",
+      "priority_explanation": "This is a quality/rendering issue with PDF exports affecting a Growth plan customer. The feature works (PDFs are generated) but the output quality is degraded. The customer has a legitimate business need (client-facing reports) but there is no indication of a hard deadline or total feature failure. The on-screen workaround exists (viewing charts in-browser). This aligns with 'medium' priority: intermittent/partial bug with a workaround available, affecting a single team without an immediate critical deadline.",
+      "priority_confidence": 0.82,
+      "response": "Hi Firebrand Media team,\n\nThank you for reaching out about the chart resolution in your PDF exports. I understand how important it is for client-facing reports to look sharp and professional, and I'm sorry the current output isn't meeting that standard.\n\nThis is a known area we've been working on with our PDF rendering service. The pixelation you're seeing is likely related to how our export pipeline rasterizes chart elements during the PDF generation process. Here are a few things I'd like to try:\n\n1. **Browser-side workaround:** Before exporting, try zooming your browser to 150% or 200% and then initiating the PDF export. In some cases, this can improve the resolution of rendered chart elements in the output.\n\n2. **Alternative export path:** If available on your plan, try using **Reports > Export** and selecting the \"High Quality PDF\" option (if visible). This uses a different rendering path that may produce crisper charts.\n\n3. **Screenshot supplement:** As a short-term workaround, you can take high-resolution screenshots of the charts directly from the dashboard (using Windows Snipping Tool at full screen) and insert them into your reports manually.\n\nIn the meantime, I've flagged this with our engineering team for investigation. Our PDF rendering service (which handles chart-to-PDF conversion) has had some recent updates, and this may be a side effect we need to address \u2014 similar to rendering issues we've resolved in the past.\n\nCould you share a sample exported PDF so we can compare the output quality on our end? That will help us pinpoint whether this is a configuration issue or a broader rendering bug.\n\nThank you for your patience, and we'll keep you updated on progress!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.85,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1330,
+        "output_tokens": 673,
+        "time_taken": 0.226665
+      }
+    },
+    {
+      "ticket_id": "EVAL-041",
+      "category": "bug",
+      "category_explanation": "The customer describes a functional failure where Workspace Blueprints are not fully applying their configured structure\u2014spaces are created but default channels and permission groups are missing. This matches the 'bug' category (broken features, unexpected behavior, functional regressions). Historical ticket TK-0780 documents this exact known issue: Blueprint channel provisioning fails silently when the creating user lacks channel-admin permissions in the parent workspace.",
+      "category_confidence": 0.95,
+      "priority": "high",
+      "priority_explanation": "Multiple escalation rules apply: (1) Enterprise Impact\u2014this is an Enterprise customer and the issue affects provisioning for three new departments, impacting multiple users and core workflows. (2) Silent Failure\u2014the Blueprint process completes partially without surfacing an error, meaning channels and permission groups silently fail to be created. (3) This is also an onboarding/migration-adjacent blocker since new departments cannot be properly set up. Per guidelines, workflow-blocking issues on Enterprise accounts and silent failures should be at least High priority.",
+      "priority_confidence": 0.92,
+      "response": "Hi Peakline Software team,\n\nThank you for reaching out about this. What you're experiencing is a known issue with Workspace Blueprint provisioning \u2014 we've seen this before and have a confirmed fix.\n\nThe root cause is that the Blueprint channel and permission group creation steps can fail silently when the user executing the Blueprint doesn't have channel-admin permissions in the parent workspace. The spaces themselves get created successfully, but the subsequent steps (default channels and permission groups) fail without surfacing an error.\n\nThis was addressed in our v3.15.0 release, where Blueprint execution now uses system-level permissions for channel creation and permission group provisioning. Could you confirm which version of Steadfast your workspace is currently running? You can check this under **Settings > About**.\n\nIn the meantime, here are two paths forward:\n\n1. **Immediate workaround:** Ensure the user running the Blueprint has full channel-admin permissions in the parent workspace before executing it. This should allow the full Blueprint (including channels and permission groups) to apply correctly.\n2. **Version update:** If your instance is on a version prior to v3.15.0, we can coordinate an update with your account team to resolve this permanently.\n\nGiven that you're setting up three new departments, I want to make sure we get this unblocked for you quickly. I've flagged this for priority attention, and a member of our team will follow up to assist with the resolution.\n\nPlease don't hesitate to reach out if you have any questions in the meantime.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.93,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "onboarding-blocker",
+        "silent-failure",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1329,
+        "output_tokens": 676,
+        "time_taken": 0.268397
+      }
+    },
+    {
+      "ticket_id": "EVAL-042",
+      "category": "bug",
+      "category_explanation": "The customer is reporting that the Pulse Check report is displaying stale/outdated data despite showing a recent generation timestamp. This is a functional regression \u2014 the feature is not working as expected, matching the 'bug' category definition of 'broken features, unexpected behavior, functional regressions.' This closely matches historical ticket TK-0786 which documented the same Pulse Check stale data issue caused by an incorrect cache TTL.",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "This is a workflow-blocking issue: the customer's Monday executive standup directly depends on accurate Pulse Check data, making it a major feature failure that blocks a core workflow. The customer notes this is a recurring/regression issue ('we've seen this before and thought it was fixed'), which increases urgency. While Firebrand Media is on a Growth plan (not Enterprise), the issue blocks a defined executive workflow. Per guidelines, 'major feature failures' and 'workflow-blocking issues where a user/team cannot proceed' warrant high priority. Not critical because it's not production-down or data-loss, but it is actively blocking their executive reporting process.",
+      "priority_confidence": 0.88,
+      "response": "Hi Firebrand Media team,\n\nThank you for reporting this \u2014 I'm sorry the Pulse Check report is showing stale data again, especially given its importance to your Monday executive standup.\n\nWe've seen this issue before and it was previously traced to a cache TTL (time-to-live) misconfiguration where the Pulse Check report dataset cache was retaining data longer than intended. It appears this regression may have resurfaced.\n\nHere's what we're doing right now:\n\n1. **Immediate action:** I'm escalating this to our engineering team to manually invalidate the cached report for your workspace so your next Pulse Check generation pulls fresh data.\n2. **Investigation:** We'll verify whether the cache TTL has drifted again from its correct 7-day setting and apply a fix if needed.\n\n**In the meantime**, as a workaround, you can use our Custom Report Builder to create a report with the same core KPIs (velocity, completion rate, overdue %, active contributors) and schedule it to run before your Monday standup. I'd be happy to share our Custom Report Builder guide if that would be helpful.\n\nWe understand this is time-sensitive for your executive meetings, and we'll prioritize getting your Pulse Check back to showing current data as quickly as possible. I'll follow up with a status update shortly.\n\nThank you for your patience,\nSteadfast Support",
+      "confidence": 0.94,
+      "flags": [
+        "llm_used",
+        "time-sensitive",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1403,
+        "output_tokens": 656,
+        "time_taken": 0.256845
+      }
+    },
+    {
+      "ticket_id": "EVAL-043",
+      "category": "bug",
+      "category_explanation": "The customer reports that Smart Routing is assigning tasks to the wrong teams \u2014 this is broken/unexpected behavior of an existing feature, matching the 'bug' category. This closely mirrors historical ticket TK-0790 (Smart Routing assigning tickets to the wrong team).",
+      "category_confidence": 0.97,
+      "priority": "high",
+      "priority_explanation": "This is a workflow-blocking issue affecting the entire team's task routing \u2014 30% misassignment rate is a major feature failure causing delays across multiple team members. Per the classification guidelines, 'major feature failures' and 'workflow-blocking issues where a user/team cannot proceed' warrant high priority. While not a total outage (which would be critical), the sustained misrouting is significantly disrupting productivity and could lead to missed customer support tickets.",
+      "priority_confidence": 0.92,
+      "response": "Hi Cliffside Ventures team,\n\nThank you for reporting this \u2014 I'm sorry Smart Routing has been misassigning your tasks. A 30% misrouting rate is definitely not expected behavior, and I understand the delays this is causing across your teams.\n\nWe've seen similar behavior before where Smart Routing's underlying ML model picks up anomalous assignment patterns from historical data and begins routing tasks incorrectly. In those cases, rolling back to a previous model version and applying a confidence threshold resolved the issue.\n\nHere's what we're doing next:\n\n1. **Immediate investigation:** I'm escalating this to our engineering team to review the routing model currently active on your workspace and identify what's driving the misassignments between your Customer Support and Engineering teams.\n2. **Model rollback:** If the model has been trained on incorrect patterns, we'll roll it back to a known-good version.\n3. **Confidence threshold:** We'll look into adding or adjusting a confidence threshold so that low-confidence assignments are flagged for manual review rather than auto-assigned.\n\n**In the meantime**, as a temporary workaround, you can disable Smart Routing and use workflow automation rules to handle basic task assignment (Settings > Automation > Routing Rules). This will give you manual control while we resolve the ML model issue.\n\nCould you also let us know:\n- Approximately when you first enabled Smart Routing?\n- Whether any team members were recently reassigned or any team structures changed before the misrouting started?\n\nThis information will help us pinpoint the root cause more quickly. We'll keep you updated as we investigate.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1444,
+        "output_tokens": 633,
+        "time_taken": 0.274265
+      }
+    },
+    {
+      "ticket_id": "EVAL-044",
+      "category": "bug",
+      "category_explanation": "The customer reports that Cascade permissions are not propagating role changes to child spaces despite being enabled and toggled. This is a broken feature / unexpected behavior, which fits the 'bug' category. While it touches on permissions (which could be security), the core issue is a functional regression or malfunction of the Cascade feature itself.",
+      "category_confidence": 0.9,
+      "priority": "high",
+      "priority_explanation": "This is an Enterprise customer experiencing a workflow-blocking issue where permission gaps are preventing users from accessing what they need. Per the Enterprise Impact escalation rule, issues affecting multiple users or core workflows on an Enterprise plan should be escalated to High or Critical. The issue affects team-wide permission propagation, blocking productivity across sub-spaces. Additionally, this could be considered a silent failure since the system doesn't error but fails to propagate correctly, which per Silent Failures rule should be at least High.",
+      "priority_confidence": 0.9,
+      "response": "Hi Solace HR team,\n\nThank you for reaching out about this Cascade permissions issue. I understand how disruptive permission gaps can be, especially when team members are unable to access the spaces they need.\n\nBased on our knowledge base, there is a known edge case with Cascade permissions: if sub-spaces were created **before** Cascade was initially enabled on the workspace, the inheritance rules may not retroactively apply to those pre-existing sub-spaces. Simply toggling Cascade off and on again may not resolve this on its own.\n\nHere's what I'd recommend trying:\n\n1. **Disable Cascade** permissions on your workspace.\n2. **Re-enable Cascade** permissions.\n3. Look for the **'Apply to existing sub-spaces'** option in the Cascade settings and click it. This step is critical \u2014 it forces the inheritance rules to be applied retroactively to sub-spaces that were created before Cascade was enabled.\n\nIf you've already tried this exact sequence including the 'Apply to existing sub-spaces' step and the issue persists, please let us know and we'll escalate this to our engineering team for further investigation. Given that you're on an Enterprise plan with active permission gaps affecting your team, we'll treat this with high priority.\n\nIn the meantime, as a temporary workaround, you can manually adjust permissions at the sub-space level to restore access for affected team members while we work toward a permanent resolution.\n\nPlease don't hesitate to reach out if you have any questions or need further assistance.\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.88,
+      "flags": [
+        "enterprise-impact",
+        "llm_used",
+        "silent-failure",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1400,
+        "output_tokens": 644,
+        "time_taken": 0.250596
+      }
+    },
+    {
+      "ticket_id": "EVAL-045",
+      "category": "onboarding",
+      "category_explanation": "The customer is asking a 'how to' question about setting up a feature (Smart Routing) for their team. This is a getting-started/setup inquiry, which falls under the onboarding category per the classification guidelines.",
+      "category_confidence": 0.9,
+      "priority": "low",
+      "priority_explanation": "This is a general 'how-to' question with no urgency cues, no business-critical deadline, and no blocking issue. The customer is on a Starter plan (not Enterprise), so no enterprise-impact escalation applies. Per the guidelines, general how-to questions are classified as low priority. The historical example TK-0792 (same subject pattern \u2014 asking about Smart Routing on a non-qualifying plan) was also classified as low priority.",
+      "priority_confidence": 0.95,
+      "response": "Hi Arclight Gaming team,\n\nThank you for reaching out! It's great that you're looking to streamline your task assignment process \u2014 Smart Routing is a fantastic feature for exactly that.\n\nSmart Routing is Steadfast's AI-powered automatic task assignment system. It uses historical assignment patterns, team capacity, and task content analysis to intelligently route tasks to the right team members without manual intervention.\n\nHowever, I want to be upfront: **Smart Routing is available on our Growth and Enterprise plans only** and is not currently included in the Starter plan, which is why you weren't able to find it in your Settings.\n\nHere's what I'd recommend in the meantime:\n\n1. **Workflow Automation Rules (available on Starter):** You can set up basic automatic assignment rules that route tasks based on criteria you define, such as project, task type, or labels. This can significantly reduce manual assignment for your team of 8. You can find this under **Settings > Workflow > Automation Rules**.\n\n2. **Consider upgrading to Growth:** If your team's needs grow and you'd like the full AI-powered Smart Routing experience along with other advanced features, upgrading to the Growth plan would unlock it. I'm happy to walk you through the differences between plans if that would be helpful.\n\nPlease let me know if you'd like help setting up workflow automation rules or if you have any questions about plan options. We're here to help!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used"
+      ],
+      "usage": {
+        "input_tokens": 1375,
+        "output_tokens": 584,
+        "time_taken": 0.193508
+      }
+    },
+    {
+      "ticket_id": "EVAL-046",
+      "category": "feature_request",
+      "category_explanation": "The customer is requesting the ability to customize Pulse Check metrics by adding custom KPIs (crop yield tracking, supplier SLA compliance). This is a request for new functionality that doesn't currently exist. Matches closely with TK-0788 which is the same feature request for customizing Pulse Check metrics.",
+      "category_confidence": 0.97,
+      "priority": "low",
+      "priority_explanation": "This is a feature request for additional functionality with no urgency cues, no deadline mentioned, and no workflow-blocking impact. The customer is on a Growth plan (not Enterprise), so no enterprise-impact escalation applies. Per guidelines, suggestions for future features with no immediate urgency are Low priority. This aligns directly with TK-0788 which was also classified as Low.",
+      "priority_confidence": 0.92,
+      "response": "Hi Greenfield Agriculture team,\n\nThank you for reaching out about customizing the Pulse Check metrics \u2014 that's a great suggestion!\n\nCurrently, Pulse Check supports only the default metric set (velocity, completion rate, overdue %, and active contributors), so it's not yet possible to add custom KPIs like crop yield tracking percentages or supplier SLA compliance directly into the Pulse Check report.\n\nHowever, this is a feature that's on our roadmap (tracked as FR-3001), and I've added your vote and specific use case to help our product team prioritize it.\n\nIn the meantime, here's a workaround that many of our customers find helpful:\n\n- **Custom Report Builder:** You can create a custom report that includes the additional KPIs your leadership needs and schedule it to run on the same weekly cadence as Pulse Check. This way, your team receives both the standard Pulse Check and a supplementary report with your custom metrics.\n\nI'd be happy to share our Custom Report Builder guide to help you get started with setting that up. Just let me know!\n\nBest regards,\nSteadfast Support",
+      "confidence": 0.95,
+      "flags": [
+        "llm_used",
+        "workaround-available"
+      ],
+      "usage": {
+        "input_tokens": 1402,
+        "output_tokens": 508,
+        "time_taken": 0.230383
+      }
+    }
+  ]
+}
