@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 import time
 from difflib import SequenceMatcher
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from src.fallback_classification import classify_with_fallback
@@ -48,7 +50,43 @@ PRIORITY_HINTS = {
 }
 
 DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
-DEFAULT_LLM_MODEL = "claude-sonnet-4-6"
+# DEFAULT_LLM_MODEL = "claude-sonnet-4-6"
+DEFAULT_LLM_MODEL = "claude-opus-4-6"
+
+LLM_OUTPUTS_FILENAME = "llm_outputs.jsonl"
+
+
+def append_llm_output_record(output_dir: Path, record: Dict[str, object]) -> None:
+    """Append one JSON object as a line to the run's LLM log file."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / LLM_OUTPUTS_FILENAME
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def load_llm_outputs_jsonl(path: Path) -> Dict[str, Dict[str, object]]:
+    """
+    Load a JSONL file of LLM records; later lines override earlier ones per ticket_id.
+    `path` may be a file or a directory containing llm_outputs.jsonl.
+    """
+    if path.is_dir():
+        path = path / LLM_OUTPUTS_FILENAME
+    if not path.is_file():
+        raise FileNotFoundError(f"LLM outputs not found: {path}")
+
+    by_ticket: Dict[str, Dict[str, object]] = {}
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            obj = json.loads(line)
+            if not isinstance(obj, dict):
+                continue
+            tid = str(obj.get("ticket_id", "")).strip()
+            if tid:
+                by_ticket[tid] = cast(Dict[str, object], obj)
+    return by_ticket
 
 
 def _get_llm_config() -> Dict[str, str]:
@@ -158,15 +196,47 @@ def _extract_json_payload(raw_text: str) -> Optional[Dict[str, object]]:
             return None
 
 
-def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, object]]) -> Tuple[
-    Optional[Dict[str, object]], Optional[str]]:
+def _classify_with_llm(
+        ticket: Dict[str, str],
+        context_examples: List[Dict[str, object]],
+        save_dir: Optional[Path] = None,
+) -> Tuple[Optional[Dict[str, object]], Optional[str]]:
+    ticket_id = str(ticket.get("ticket_id", "")).strip()
     config = _get_llm_config()
+    model_name = config["model"]
+
+    def _log(
+            status: str,
+            *,
+            raw_content: str = "",
+            usage: Optional[Dict[str, object]] = None,
+            error: Optional[str] = None,
+            result: Optional[Dict[str, object]] = None,
+    ) -> None:
+        if save_dir is None:
+            return
+        record: Dict[str, object] = {
+            "ticket_id": ticket_id,
+            "model": model_name,
+            "status": status,
+            "usage": usage if usage is not None else {},
+        }
+        if raw_content:
+            record["raw_content"] = raw_content
+        if error:
+            record["error"] = error
+        if result is not None:
+            record["result"] = result
+        append_llm_output_record(save_dir, record)
+
     if not config["api_key"]:
+        _log("skipped", error="llm_skipped_missing_api_key")
         return None, "llm_skipped_missing_api_key"
 
     try:
         from openai import OpenAI
     except ImportError:
+        _log("skipped", error="llm_skipped_missing_openai_dependency")
         return None, "llm_skipped_missing_openai_dependency"
 
     message = _make_llm_message(ticket, context_examples)
@@ -178,10 +248,11 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
             temperature=0.1,
         )
     except Exception as e:
+        _log("error", error=f"llm_call_failed: {e}")
         return None, f"llm_call_failed: {e}"
 
     content = ""
-    usage = {}
+    usage: Dict[str, object] = {}
 
     if response.choices and response.choices[0].message:
         content = response.choices[0].message.content or ""
@@ -196,6 +267,7 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
         }
     payload = _extract_json_payload(content)
     if payload is None:
+        _log("error", raw_content=content, usage=usage, error="llm_invalid_json")
         return None, "llm_invalid_json"
 
     category = str(payload.get("category", "unknown")).strip().lower()
@@ -221,30 +293,32 @@ def _classify_with_llm(ticket: Dict[str, str], context_examples: List[Dict[str, 
         confidence = 0.75
 
     if category not in ALLOWED_CATEGORIES:
+        _log("error", raw_content=content, usage=usage, error="llm_invalid_category")
         return None, "llm_invalid_category"
     if priority not in ALLOWED_PRIORITIES:
+        _log("error", raw_content=content, usage=usage, error="llm_invalid_priority")
         return None, "llm_invalid_priority"
     if not response_text:
+        _log("error", raw_content=content, usage=usage, error="llm_empty_response")
         return None, "llm_empty_response"
 
     raw_flags = payload.get("flags", [])
     flags = [str(flag) for flag in raw_flags] if isinstance(raw_flags, list) else []
-    return (
-        {
-            "ticket_id": ticket.get("ticket_id", ""),
-            "category": category,
-            "category_explanation": category_explanation,
-            "category_confidence": category_confidence,
-            "priority": priority,
-            "priority_explanation": priority_explanation,
-            "priority_confidence": priority_confidence,
-            "response": response_text,
-            "confidence": max(0.0, min(confidence, 1.0)),
-            "flags": sorted(set(flags + ["llm_used"])),
-            "usage": usage,
-        },
-        None,
-    )
+    result = {
+        "ticket_id": ticket.get("ticket_id", ""),
+        "category": category,
+        "category_explanation": category_explanation,
+        "category_confidence": category_confidence,
+        "priority": priority,
+        "priority_explanation": priority_explanation,
+        "priority_confidence": priority_confidence,
+        "response": response_text,
+        "confidence": max(0.0, min(confidence, 1.0)),
+        "flags": sorted(set(flags + ["llm_used"])),
+        "usage": usage,
+    }
+    _log("ok", raw_content=content, usage=usage, result=result)
+    return result, None
 
 
 def _score_overlap(ticket_tokens: set[str], example_tokens: set[str], subject: str, body: str) -> float:
@@ -350,11 +424,40 @@ def retrieve_context(ticket: Dict[str, str], kb_index: Dict[str, object], top_k:
     return selected[:top_k]
 
 
-def _classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict[str, object]:
+def _classify_ticket(
+        ticket: Dict[str, str],
+        kb_index: Dict[str, object],
+        *,
+        llm_output_dir: Optional[Path] = None,
+        llm_cache: Optional[Dict[str, Dict[str, object]]] = None,
+) -> Dict[str, object]:
     context_examples = retrieve_context(ticket, kb_index)
-    llm_result, llm_error_flag = _classify_with_llm(ticket, context_examples)
+    context_ids = [example.get("ticket_id", "") for example in context_examples]
+    ticket_id = str(ticket.get("ticket_id", "")).strip()
+
+    if llm_cache is not None:
+        cached = llm_cache.get(ticket_id)
+        if cached is not None and str(cached.get("status", "")) == "ok":
+            result_any = cached.get("result")
+            if isinstance(result_any, dict):
+                result = copy.deepcopy(cast(Dict[str, object], result_any))
+                result["context_ticket_ids"] = context_ids
+                return result
+        return classify_with_fallback(
+            ticket=ticket,
+            context_examples=context_examples,
+            category_hints=CATEGORY_HINTS,
+            priority_hints=PRIORITY_HINTS,
+            allowed_categories=ALLOWED_CATEGORIES,
+            allowed_priorities=ALLOWED_PRIORITIES,
+            llm_error_flag="llm_cache_miss",
+        )
+
+    llm_result, llm_error_flag = _classify_with_llm(
+        ticket, context_examples, save_dir=llm_output_dir,
+    )
     if llm_result is not None:
-        llm_result["context_ticket_ids"] = [example.get("ticket_id", "") for example in context_examples]
+        llm_result["context_ticket_ids"] = context_ids
         return llm_result
 
     return classify_with_fallback(
@@ -368,9 +471,20 @@ def _classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dic
     )
 
 
-def classify_ticket(ticket: Dict[str, str], kb_index: Dict[str, object]) -> Dict[str, object]:
+def classify_ticket(
+        ticket: Dict[str, str],
+        kb_index: Dict[str, object],
+        *,
+        llm_output_dir: Optional[Path] = None,
+        llm_cache: Optional[Dict[str, Dict[str, object]]] = None,
+) -> Dict[str, object]:
     start_time = time.time()
-    result = _classify_ticket(ticket, kb_index)
+    result = _classify_ticket(
+        ticket,
+        kb_index,
+        llm_output_dir=llm_output_dir,
+        llm_cache=llm_cache,
+    )
     end_time = time.time()
     time_taken = end_time - start_time
     usage_any = result.get("usage", {})
