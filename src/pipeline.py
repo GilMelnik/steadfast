@@ -152,10 +152,8 @@ def run_pipeline(
     llm_path: Optional[Path] = None,
     llm_model: Optional[str] = None,
 ) -> Dict[str, object]:
-    # kb_rows = load_knowledge_base(DATA_DIR / "knowledge_base.csv")
-    # tickets = load_eval_set(DATA_DIR / "eval_set.json")
-    kb_rows = load_knowledge_base(DATA_DIR / "train_0.csv")
-    tickets = load_eval_set(DATA_DIR / "test_0.json")
+    kb_rows = load_knowledge_base(DATA_DIR / "knowledge_base.csv")
+    tickets = load_eval_set(DATA_DIR / "eval_set.json")
     kb_index = preprocess_knowledge_base(kb_rows)
 
     if verbose:

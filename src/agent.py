@@ -10,6 +10,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, cast
 
+from classification_cues import CATEGORY_HINTS, PRIORITY_HINTS
 from src.fallback_classification import classify_with_fallback
 from utils import normalize_text, tokenize
 
@@ -24,30 +25,6 @@ ALLOWED_CATEGORIES = {
     "performance",
 }
 ALLOWED_PRIORITIES = {"low", "medium", "high", "critical"}
-
-CATEGORY_HINTS = {
-    "billing": {"invoice", "charged", "refund", "credit", "payment", "billing", "seat", "tax", "address", "downgrade"},
-    "bug": {"broken", "error", "not working", "fails", "stale", "wrong", "issue", "bug", "glitch", "incorrect"},
-    "feature_request": {"feature", "request", "would love", "wish", "add support", "ability", "improvement",
-                        "suggestion"},
-    "account": {"account", "owner", "role", "permission", "users", "workspace", "deactivate", "export", "transfer",
-                "ownership", "profile"},
-    "integration": {"api", "webhook", "sso", "slack", "okta", "jira", "github", "sync", "connection", "token"},
-    "onboarding": {"how to", "setup", "set up", "getting started", "guide", "best practices", "migration", "import",
-                   "first time", "onboard"},
-    "security": {"security", "mfa", "2fa", "suspicious", "breach", "allowlist", "compromised", "unauthorized",
-                 "compliance", "audit", "rbac"},
-    "performance": {"slow", "lag", "timeout", "504", "performance", "sluggish", "latency", "freezes", "loading"},
-}
-
-PRIORITY_HINTS = {
-    "critical": {"urgent", "production down", "can't log in", "data loss", "security", "504", "board meeting",
-                 "immediate", "now", "breach"},
-    "high": {"asap", "important", "blocking", "cannot", "team affected", "stopped", "enterprise", "migration",
-             "ownership", "admin", "today", "deadline"},
-    "medium": {"inconsistent", "intermittent", "confusing", "question", "workaround", "glitch", "minor"},
-    "low": {"not urgent", "whenever", "nice to have", "would like", "quick question", "future", "cosmetic"},
-}
 
 DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
 # DEFAULT_LLM_MODEL = "claude-sonnet-4-6"

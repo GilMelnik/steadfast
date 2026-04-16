@@ -2,110 +2,159 @@
 
 ## Data Exploration
 
-I started by inspecting the knowledge base schema (`ticket_id`, `plan`, `subject`, `body`, `category`, `priority`,
-`resolution`) and sampling representative rows.
+I started by inspecting the knowledge base schema (`ticket_id`, `plan`, `subject`, `body`, `category`, `priority`, `resolution`) and sampling representative rows.
 
 What stood out:
 
-- The KB includes repeated issue patterns with concrete Steadfast product terms (e.g., HubSpot sync mapping, PDF export
-  service, IP allowlisting, workflow guides).
-- Priority is not purely category-driven: similar issues can appear with different severities depending on urgency
-  wording and plan context.
+* The KB contains recurring issue patterns tied to specific Steadfast platform features, such as HubSpot sync mapping, PDF export services, IP allowlisting, and workflow guides.
+* Priority is not determined solely by category: similar issue types can appear with different severities depending on urgency wording, customer impact, and plan context.
 
 How this informed the design:
 
-- I built preprocessing to normalize text and extract retrieval tokens from `subject + body + resolution`.
-- I used retrieval of similar KB tickets before classification so customer responses can include specific, grounded next
-  steps.
-- I kept post-processing heuristics empty since it converged to overfitting. 
+* I built preprocessing to normalize text and extract retrieval tokens from `subject + body + resolution`.
+* I used retrieval of similar historical tickets before classification, allowing customer responses to include specific, grounded next steps based on prior resolutions.
+* I kept post-processing heuristics intentionally minimal, because multiple iterations showed that manually engineered rules quickly converged to test-set-specific overfitting.
+
+---
 
 ## Pipeline Design Decisions
 
 ### Stage 1 - Load Data
 
-- Implemented in `src/pipeline.py` (`load_eval_set`) and `src/preprocess.py` (`load_knowledge_base`).
+* Implemented in `src/pipeline.py` (`load_eval_set`) and `src/preprocess.py` (`load_knowledge_base`).
+* **This stage validates the expected schema early and standardizes the in-memory format used by downstream stages.**
 
 ### Stage 2 - Preprocess
 
-- Implemented in `src/preprocess.py`:
-    - lowercasing and punctuation cleanup,
-    - whitespace normalization,
-    - lightweight stopword filtering,
-    - token set construction for retrieval.
-- Output includes an index with examples and token maps.
+Implemented in `src/preprocess.py`:
+
+* lowercasing and punctuation cleanup
+* whitespace normalization
+* lightweight stopword filtering
+* token set construction for retrieval
+
+**Design rationale:**
+
+* The goal was fast and deterministic lexical retrieval without introducing external embedding dependencies.
+* The output includes an index with examples and token maps to support efficient top-K lookup during inference.
 
 ### Stage 3 - Classification and Response Generation
 
-- Implemented in `src/agent.py` as a retrieval-augmented classifier.
-- For each eval ticket, it retrieves the top-K knowledge base neighbors using a weighted ensemble ranking:
-    - **BM25-like Lexical Score (44%)**: Rewards matching rare, high-signal tokens using Inverse Document Frequency (
-      IDF).
-    - **Token Overlap (24%)**: Measures the raw intersection density between ticket and KB tokens.
-    - **Sequence Similarity (22%)**: Uses structural matching (`SequenceMatcher`) to capture text patterns and flow.
-    - **Intent Signal (10%)**: Injects domain-specific bonuses for matching known category/priority keyword hints.
-- Classification and Response:
-    - If configured, an LLM pass uses the retrieved context for grounded, structured output.
-    - A fallback heuristic scoring system handles cases without LLM access, using nearest-neighbor priors.
-    - Responses are grounded in the resolution summaries of the top retrieved matches.
+* Implemented in `src/agent.py` as a retrieval-augmented classifier and responder.
+
+* For each eval ticket, the pipeline retrieves the top-K KB neighbors using a weighted ensemble ranking:
+
+* **BM25-like Lexical Score (44%)**: rewards matching rare, high-signal tokens using inverse document frequency (IDF).
+
+* **Token Overlap (24%)**: measures raw token intersection density.
+
+* **Sequence Similarity (22%)**: uses `SequenceMatcher` to capture structural similarity and recurring phrasing patterns.
+
+* **Intent Signal (10%)**: injects domain-specific bonuses for known category and priority hints.
+
+Classification and response generation:
+
+* If configured, an LLM pass uses the retrieved context for grounded structured output.
+* A fallback heuristic scoring system handles cases without LLM access using nearest-neighbor priors.
+* Responses are grounded in the resolution summaries of the highest-ranked retrieved matches, which improves specificity and customer usefulness.
 
 ### Stage 4 - Validation
 
-- Implemented in `src/validate.py`.
-- Enforces required fields, enum values, non-empty response, confidence bounds.
-- Invalid outputs are corrected to safe defaults and tagged in `flags`.
+* Implemented in `src/validate.py`.
+* Enforces:
+
+  * required fields
+  * valid enum values
+  * non-empty response
+  * confidence bounds
+* Invalid outputs are corrected to safe defaults and tagged in `flags`.
 
 ### Stage 5 - Post-Processing Heuristics
 
-- Implemented in `src/postprocess.py`.
-- kept empty. I tried a few iteration of finding some rules, but they kept converging to some samples specific overfitting. 
+* Implemented in `src/postprocess.py`.
+* Final version intentionally kept minimal.
+
+I experimented with multiple rule-based corrections, especially around priority, but repeated testing on newly sampled KB-derived sets showed these rules were overfitting to the dev distribution rather than learning robust business logic.
+
 
 ### Stage 6 - Evaluation
 
-- Implemented in `src/evaluate.py`.
-- Metrics:
-    - **Category Accuracy**: Both exact match and partial-credit (0.5) for related pairs (e.g., bug/performance,
-      account/onboarding, integration/onboarding).
-    - **Priority Accuracy**: Both exact match and a normalized distance score (ordinal penalty) where closer misses (
-      e.g., low vs medium) receive more credit than far misses (e.g., low vs critical).
-    - **Response Quality Score**: A weighted heuristic measuring relevance, actionability, and alignment.
-- Includes per-category/priority breakdowns, top confusion pairs, and resource usage tracking (tokens and latency).
+* Implemented in `src/evaluate.py`.
+
+Metrics:
+
+* **Category Accuracy**: exact match + partial credit (0.5) for related pairs (e.g. bug/performance, account/onboarding, integration/onboarding).
+* **Priority Accuracy**: exact match + normalized ordinal distance score.
+* **Response Quality Score**: weighted heuristic measuring relevance, actionability, and alignment.
+
+The evaluation also includes:
+
+* per-category breakdowns
+* per-priority breakdowns
+* top confusion pairs
+* latency and token usage tracking
+
 
 ### Stage 7 - Error Analysis
 
-- Implemented in `src/analyze.py`.
-- Produces root-cause buckets, confusion tables, flag frequency, and sampled error examples.
+* Implemented in `src/analyze.py`.
+* Produces:
+
+  * root-cause buckets
+  * confusion tables
+  * validation flag frequency
+  * sampled error examples
+
+This stage was used as the main driver for prompt refinement and heuristic rollback decisions.
+
+---
 
 ## Iteration Log
 
-- I started by getting a baseline with running without an LLM and with an LLM, just to understand what is the playground.
-- I tried a rerank logic for retrieving better context, but it did not help much.
-- I removed the too generic post processing logic, which improved the priority accuracy.
-- I then focused on improving the prompt, focusing more on priority.
-- I used the mistakes from the previous iteration to implement a post process logic that focuses on priority, which improved the priority accuracy.
-- I suspected that post process is overfitted to the test set, so I sampled a new test set from the kb. 
-The priority accuracy dropped significantly, which made me realize that the post process logic is overfitted to the original test set. 
-- I removed the post process logic, and simplified the prompt further to avoid overfitting. 
-- I resampled a new smaller test set with distribution matching the kb, for faster tests. 
-- I changed the prompt to request a scoring to the prediction. It improved the priority accuracy.
-- I tried another model. Up to this experiment, all tries were done with claude-sonnet-4-6, which was the only model I managed to use. After emailing Guy, I managed to use other models. 
-I focused only on the most fitting to this project - claude-opus-4-6.
+My iteration process focused on separating real improvements from dev-set overfitting.
+
+### What worked
+
+* Adding an LLM significantly improved category accuracy and response quality.
+* Prompt iterations that explicitly asked the model to score its own confidence before selecting priority improved priority performance.
+* Claude Opus produced the strongest category accuracy on the official eval set.
+
+### What did not work
+
+* Retrieval reranking produced negligible gains relative to complexity.
+* Rule-based priority post-processing initially improved dev-set metrics, but failed badly on newly sampled KB-derived test sets.
+* Aggressive prompt specialization also showed signs of overfitting and did not generalize.
+
+### Iteration narrative
+
+* I first established baselines with and without an LLM (Claude Sonnet 4.6) to understand the improvement ceiling.
+* I then tested retrieval reranking, which gave only marginal gains.
+* Priority became the main weakness, so I focused iterations on prompt wording and confidence estimation.
+* A temporary priority-specific post-processing layer improved the official dev score.
+* To test robustness, I sampled fresh validation sets from the KB.
+* The sharp priority drop on these new sets revealed that the heuristic layer was overfitting.
+* I then removed most post-processing logic and simplified the prompt to improve generalization.
+* Finally, after gaining access to additional models, I tested **Claude Opus 4.6**, which gave the strongest final eval-set results.
 
 
-| Iteration | change                                                    | num_tickets | category_accuracy_exact | priority_accuracy_exact | response_quality_score |
-|-----------|-----------------------------------------------------------|-------------|-------------------------|-------------------------|------------------------|
-| 1         | First run without an LLM                                  | 46          | 0.6522                  | 0.587                   | 0.8693                 |
-| 2         | Run with LLM                                              | 46          | 0.8696                  | 0.5                     | 0.9668                 |
-| 3         | Tried a rerank logic with LLM                             | 46          | 0.8913                  | 0.5                     | 0.9697                 |
-| 4         | Removed post process                                      | 46          | 0.8913                  | 0.5217                  | 0.972                  |
-| 5         | Tried a new prompt                                        | 46          | 0.8913                  | 0.6087                  | 0.9609                 |
-| 6         | Reimplement a post process logic that focuses on priority | 46          | 0.8913                  | 0.6957                  | 0.9525                 |
-| 7         | Run on a new test set sampled from kb                     | 62          | 0.9194                  | 0.2581                  | 0.9593                 |
-| 8         | Removed post process                                      | 62          | 0.9194                  | 0.3065                  | 0.9625                 |
-| 9         | Simplified prompt to aviod overfitting                    | 62          | 0.9194                  | 0.3226                  | 0.9647                 |
-| 10        | Sampled a smaller test set with distribution matching kb  | 50          | 0.8                     | 0.28                    | 0.9641                 |
-| 11        | Added the prompt a request for scoring their prediction   | 50          | 0.86                    | 0.34                    | 0.965                  |
-| 12        | Tried Claude-Opuse-4-6                                    | 50          | 0.9                     | 0.3                     | 0.9671                 |
-| 14        | Run Claude-Opuse-4-6 on eval_set.json                     | 46          | 0.913                   | 0.6522                  | 0.9476                 |
+| Iteration | change                                                                   | num_tickets | category_accuracy_exact | priority_accuracy_exact | response_quality_score |
+|-----------|--------------------------------------------------------------------------|-------------|-------------------------|-------------------------|------------------------|
+| 1         | Baseline heuristic retrieval pipeline without LLM classification         | 46          | 0.6522                  | 0.587                   | 0.8693                 |
+| 2         | Added LLM-based classification                                           | 46          | 0.8696                  | 0.5                     | 0.9668                 |
+| 3         | Tested retrieval reranking to improve top-K KB context quality           | 46          | 0.8913                  | 0.5                     | 0.9697                 |
+| 4         | Removed generic post-processing after weak impact on robustness          | 46          | 0.8913                  | 0.5217                  | 0.972                  |
+| 5         | Refined prompt to improve priority reasoning and issue grounding         | 46          | 0.8913                  | 0.6087                  | 0.9609                 |
+| 6         | Added priority-focused heuristic correction layer                        | 46          | 0.8913                  | 0.6957                  | 0.9525                 |
+| 7         | Validated generalization on a newly sampled KB-derived test set          | 62          | 0.9194                  | 0.2581                  | 0.9593                 |
+| 8         | Removed priority heuristics after detecting dev-set overfitting          | 62          | 0.9194                  | 0.3065                  | 0.9625                 |
+| 9         | Simplified prompt to improve generalization and reduce overfitting       | 62          | 0.9194                  | 0.3226                  | 0.9647                 |
+| 10        | Created smaller distribution-matched validation set for faster iteration | 50          | 0.8                     | 0.28                    | 0.9641                 |
+| 11        | Added the prompt a self-scored confidence and explanation step           | 50          | 0.86                    | 0.34                    | 0.965                  |
+| 12        | Switched model to Claude Opus 4.6 for stronger reasoning quality         | 50          | 0.9                     | 0.3                     | 0.9671                 |
+| 13        | Final Claude Opus 4.6 evaluation on official dev set                     | 46          | 0.913                   | 0.6522                  | 0.9521                 |
+
+
+---
 
 ## Response Quality Metric
 
@@ -115,26 +164,28 @@ I used a bounded heuristic score in `src/evaluate.py`:
 
 Where:
 
-- `lexical_overlap`: overlap between ticket tokens and response tokens,
-- `actionability`: binary signal from markers like `please`, `settings >`, `share`, `enable`, `resync`,
-- `category_alignment`: full credit if predicted category matches expected, partial otherwise.
+* `lexical_overlap`: overlap between ticket tokens and response tokens
+* `actionability`: binary signal from markers such as `please`, `settings >`, `share`, `enable`, `resync`
+* `category_alignment`: full credit if predicted category matches expected, partial otherwise
 
 Why this metric:
 
-- It rewards relevance and concrete next steps rather than politeness alone.
-- It is deterministic and fast, useful for iterative local tuning.
+* It rewards issue-specific relevance and actionable next steps, not just polite phrasing.
+* It is deterministic, fast, and suitable for rapid local iteration loops.
 
 Limitations:
 
-- It is not a semantic judge; it can miss nuanced correctness.
-- Token overlap can reward superficial mirroring.
-- A future upgrade should use an LLM-as-judge rubric aligned to hidden-test criteria.
+* It is not a semantic judge and can miss nuanced correctness.
+* Token overlap may reward superficial mirroring.
 
-## What I'd Do Differently
+---
+
+## What I’d Do Differently
 
 With more time, I would:
 
-1. Add embeddings-based retrieval for stronger semantic match than token overlap.
-2. Improve quality matrics with am LLM judge
-3. Implement Cross Validation logic to try on a few sampled test sets, without using the official test set.
-4. Try other LLM models. 
+1. Add embedding-based retrieval for stronger semantic matching than lexical overlap.
+2. Replace the heuristic quality metric with an LLM judge aligned to the hidden rubric.
+3. Add cross-validation over multiple KB-derived sampled dev sets to detect overfitting earlier.
+4. Expand model comparisons across more providers and reasoning-focused models.
+

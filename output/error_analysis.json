@@ -47,12 +47,12 @@
   "flag_frequency": {
     "llm_used": 46,
     "onboarding-blocker": 6,
-    "time-sensitive": 19,
+    "time-sensitive": 21,
     "silent-failure": 8,
-    "workaround-available": 18,
     "enterprise-impact": 14,
+    "workaround-available": 17,
     "sensitive-operation": 8,
-    "data-loss-risk": 5
+    "data-loss-risk": 4
   },
   "error_examples": [
     {
@@ -88,7 +88,8 @@
       "predicted_priority": "high",
       "flags": [
         "llm_used",
-        "onboarding-blocker"
+        "onboarding-blocker",
+        "time-sensitive"
       ]
     },
     {
@@ -101,7 +102,9 @@
       "flags": [
         "llm_used",
         "sensitive-operation",
-        "time-sensitive"
+        "silent-failure",
+        "time-sensitive",
+        "workaround-available"
       ]
     },
     {
@@ -141,7 +144,8 @@
       "flags": [
         "enterprise-impact",
         "llm_used",
-        "sensitive-operation"
+        "sensitive-operation",
+        "time-sensitive"
       ]
     },
     {
@@ -294,7 +298,6 @@
       "flags": [
         "enterprise-impact",
         "llm_used",
-        "silent-failure",
         "workaround-available"
       ]
     }
