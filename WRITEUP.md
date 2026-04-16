@@ -17,8 +17,7 @@ How this informed the design:
 - I built preprocessing to normalize text and extract retrieval tokens from `subject + body + resolution`.
 - I used retrieval of similar KB tickets before classification so customer responses can include specific, grounded next
   steps.
-- I added post-processing heuristics for known ambiguous boundaries (billing/account, onboarding/integration,
-  bug/performance) and urgency escalations.
+- I kept post-processing heuristics empty since it converged to overfitting. 
 
 ## Pipeline Design Decisions
 
@@ -58,15 +57,7 @@ How this informed the design:
 ### Stage 5 - Post-Processing Heuristics
 
 - Implemented in `src/postprocess.py`.
-- **Category Corrections**:
-    - Re-routes `billing` tickets to `account` if they focus on legal/SLA terms rather than specific charges.
-    - Moves `integration` hits to `bug` when explicit 500 errors are present.
-    - Converts `integration` to `feature_request` for requests framed as "would love to see" functionality.
-- **Priority Adjustments**:
-    - **Escalations**: Forces `high` or `critical` for onboarding blockers, silent failures, data loss signals, or churn
-      risks (cancellations) on Enterprise and Growth plans.
-    - **De-escalations**: Dampens priority for simple "how-to" questions on Starter plans, non-breach security setups (
-      SSO/allowlisting) with available workarounds, and billing discount inquiries.
+- kept empty. I tried a few iteration of finding some rules, but they kept converging to some samples specific overfitting. 
 
 ### Stage 6 - Evaluation
 
@@ -91,30 +82,30 @@ How this informed the design:
 - I removed the too generic post processing logic, which improved the priority accuracy.
 - I then focused on improving the prompt, focusing more on priority.
 - I used the mistakes from the previous iteration to implement a post process logic that focuses on priority, which improved the priority accuracy.
-- I suspected that post process is overfitted to the test set, so I sampled a new test set from the kb. The priority accuracy dropped significantly, which made me realize that the post
-  process logic is overfitting to the original test set. 
+- I suspected that post process is overfitted to the test set, so I sampled a new test set from the kb. 
+The priority accuracy dropped significantly, which made me realize that the post process logic is overfitted to the original test set. 
 - I removed the post process logic, and simplified the prompt further to avoid overfitting. 
-- The priority accuracy was still low, which made me suspect that the distribution of the test set is still not matching 
-the distribution of the kb, so I resampled a new small test set with distribution matching the kb. 
+- I resampled a new smaller test set with distribution matching the kb, for faster tests. 
 - I changed the prompt to request a scoring to the prediction. It improved the priority accuracy.
-- I realize that the post process logic is still overfitting to the original test set, so I reimplemented the post process
+- I tried another model. Up to this experiment, all tries were done with claude-sonnet-4-6, which was the only model I managed to use. After emailing Guy, I managed to use other models. 
+I focused only on the most fitting to this project - claude-opus-4-6.
 
 
-| Iteration | change                                                     | num_tickets | category_accuracy_exact | priority_accuracy_exact | response_quality_score |
-|-----------|------------------------------------------------------------|-------------|-------------------------|-------------------------|------------------------|
-| 1         | First run without an LLM                                   | 46          | 0.6522                  | 0.587                   | 0.8693                 |
-| 2         | Run with LLM                                               | 46          | 0.8696                  | 0.5                     | 0.9668                 |
-| 3         | Tried a rerank logic with LLM                              | 46          | 0.8913                  | 0.5                     | 0.9697                 |
-| 4         | Removed post process                                       | 46          | 0.8913                  | 0.5217                  | 0.972                  |
-| 5         | Tried a new prompt                                         | 46          | 0.8913                  | 0.6087                  | 0.9609                 |
-| 6         | Reimplement a post process logic that focuses on priority  | 46          | 0.8913                  | 0.6957                  | 0.9525                 |
-| 7         | Run on a new test set sampled from kb                      | 62          | 0.9194                  | 0.2581                  | 0.9593                 |
-| 8         | Removed post process                                       | 62          | 0.9194                  | 0.3065                  | 0.9625                 |
-| 9         | Simplified prompt to aviod overfitting                     | 62          | 0.9194                  | 0.3226                  | 0.9647                 |
-| 10        | Sampled a new small test set with distribution matching kb | 50          | 0.8                     | 0.28                    | 0.9641                 |
-| 11        | Added the prompt a request for scoring their prediction    | 50          | 0.86                    | 0.34                    | 0.965                  |
-| 12        | Reimplement post process based on sampled test set         | 50          | 0.84                    | 0.34                    | 0.9729                 |
-| 14        | Run on eval_set.json                                       | 46          | 0.8478                  | 0.6087                  | 0.9764                 |
+| Iteration | change                                                    | num_tickets | category_accuracy_exact | priority_accuracy_exact | response_quality_score |
+|-----------|-----------------------------------------------------------|-------------|-------------------------|-------------------------|------------------------|
+| 1         | First run without an LLM                                  | 46          | 0.6522                  | 0.587                   | 0.8693                 |
+| 2         | Run with LLM                                              | 46          | 0.8696                  | 0.5                     | 0.9668                 |
+| 3         | Tried a rerank logic with LLM                             | 46          | 0.8913                  | 0.5                     | 0.9697                 |
+| 4         | Removed post process                                      | 46          | 0.8913                  | 0.5217                  | 0.972                  |
+| 5         | Tried a new prompt                                        | 46          | 0.8913                  | 0.6087                  | 0.9609                 |
+| 6         | Reimplement a post process logic that focuses on priority | 46          | 0.8913                  | 0.6957                  | 0.9525                 |
+| 7         | Run on a new test set sampled from kb                     | 62          | 0.9194                  | 0.2581                  | 0.9593                 |
+| 8         | Removed post process                                      | 62          | 0.9194                  | 0.3065                  | 0.9625                 |
+| 9         | Simplified prompt to aviod overfitting                    | 62          | 0.9194                  | 0.3226                  | 0.9647                 |
+| 10        | Sampled a smaller test set with distribution matching kb  | 50          | 0.8                     | 0.28                    | 0.9641                 |
+| 11        | Added the prompt a request for scoring their prediction   | 50          | 0.86                    | 0.34                    | 0.965                  |
+| 12        | Tried Claude-Opuse-4-6                                    | 50          | 0.9                     | 0.3                     | 0.9671                 |
+| 14        | Run Claude-Opuse-4-6 on eval_set.json                     | 46          | 0.913                   | 0.6522                  | 0.9476                 |
 
 ## Response Quality Metric
 
@@ -144,4 +135,6 @@ Limitations:
 With more time, I would:
 
 1. Add embeddings-based retrieval for stronger semantic match than token overlap.
-2. Improve priority modeling with calibrated probabilities and richer urgency features.
+2. Improve quality matrics with am LLM judge
+3. Implement Cross Validation logic to try on a few sampled test sets, without using the official test set.
+4. Try other LLM models. 
