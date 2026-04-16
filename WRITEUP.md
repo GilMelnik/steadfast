@@ -86,15 +86,16 @@ How this informed the design:
 
 ## Iteration Log
 
-- I started by getting a baseline with running without an LLM and with an LLM, just to understand what is playground.
+- I started by getting a baseline with running without an LLM and with an LLM, just to understand what is the playground.
 - I tried a rerank logic for retrieving better context, but it did not help much.
-- I then focused on improving the prompt, but it seems that the post process logic is more effective for improving the
-  priority accuracy, so I reimplemented it to focus more on priority.
+- I removed the too generic post processing logic, which improved the priority accuracy.
+- I then focused on improving the prompt, focusing more on priority.
+- I used the mistakes from the previous iteration to implement a post process logic that focuses on priority, which improved the priority accuracy.
 - I suspected that post process is overfitted to the test set, so I sampled a new test set from the kb. The priority accuracy dropped significantly, which made me realize that the post
   process logic is overfitting to the original test set. 
-- I removed the post process logic, but the priority accuracy was still low, so I simplified the prompt further to avoid overfitting. 
-- The priority accuracy was still low, which made me realize that the distribution of the test set is still not matching 
-the distribution of the kb, so I sampled a new small test set with distribution matching the kb, which improved the priority accuracy, but it was still low. 
+- I removed the post process logic, and simplified the prompt further to avoid overfitting. 
+- The priority accuracy was still low, which made me suspect that the distribution of the test set is still not matching 
+the distribution of the kb, so I resampled a new small test set with distribution matching the kb. 
 - I changed the prompt to request a scoring to the prediction. It improved the priority accuracy.
 - I realize that the post process logic is still overfitting to the original test set, so I reimplemented the post process
 
@@ -112,8 +113,7 @@ the distribution of the kb, so I sampled a new small test set with distribution 
 | 9         | Simplified prompt to aviod overfitting                     | 62          | 0.9194                  | 0.3226                  | 0.9647                 |
 | 10        | Sampled a new small test set with distribution matching kb | 50          | 0.8                     | 0.28                    | 0.9641                 |
 | 11        | Added the prompt a request for scoring their prediction    | 50          | 0.86                    | 0.34                    | 0.965                  |
-| 12        | Run on eval_set.json                                       | 46          | 0.8696                  | 0.5435                  | 0.9694                 |
-| 13        | Reimplement post process based on sampled test set         | 50          | 0.84                    | 0.34                    | 0.9729                 |
+| 12        | Reimplement post process based on sampled test set         | 50          | 0.84                    | 0.34                    | 0.9729                 |
 | 14        | Run on eval_set.json                                       | 46          | 0.8478                  | 0.6087                  | 0.9764                 |
 
 ## Response Quality Metric

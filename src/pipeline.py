@@ -61,6 +61,7 @@ class PipelineCliOptions:
     output_name_suffix: str
     llm_mode: str  # "rerun" | "last" | "path"
     llm_path: Optional[Path]
+    llm_model: Optional[str]
 
 
 def _to_float(value: Any, default: float = 0.0) -> float:
@@ -81,7 +82,7 @@ def _build_run_output_dir(now: datetime | None = None, name_suffix: str = "") ->
     base = run_time.strftime("%Y_%m_%d_%H_%M")
     suffix = _sanitize_output_name_suffix(name_suffix)
     if suffix:
-        run_dir_name = f"{base}_{suffix}_"
+        run_dir_name = f"{base}_{suffix}"
     else:
         run_dir_name = base + "_"
     return OUTPUTS_DIR / run_dir_name
@@ -103,6 +104,7 @@ def _run_single_pass(
     *,
     llm_output_dir: Optional[Path] = None,
     llm_cache: Optional[Dict[str, Dict[str, object]]] = None,
+    llm_model: Optional[str] = None,
 ) -> Tuple[List[Dict[str, object]], Dict[str, object], Dict[str, object], float]:
     predictions: List[Dict[str, object]] = []
     validation_issue_count = 0
@@ -113,6 +115,7 @@ def _run_single_pass(
             kb_index,
             llm_output_dir=llm_output_dir,
             llm_cache=llm_cache,
+            llm_model=llm_model,
         )
         validated, validation_issues = validate_prediction(raw)
         validation_issue_count += len(validation_issues)
@@ -147,6 +150,7 @@ def run_pipeline(
     output_name_suffix: str = "",
     llm_mode: str = "rerun",
     llm_path: Optional[Path] = None,
+    llm_model: Optional[str] = None,
 ) -> Dict[str, object]:
     # kb_rows = load_knowledge_base(DATA_DIR / "knowledge_base.csv")
     # tickets = load_eval_set(DATA_DIR / "eval_set.json")
@@ -180,6 +184,7 @@ def run_pipeline(
         verbose=verbose,
         llm_output_dir=llm_output_dir,
         llm_cache=llm_cache,
+        llm_model=llm_model,
     )
 
     eval_payload = {
@@ -215,6 +220,7 @@ def _parse_pipeline_args(args: List[str]) -> PipelineCliOptions:
             "  --verbose              Print per-ticket progress and metrics\n"
             "  --plot                 Write visualization PNGs\n"
             "  --output-name-suffix S Append S to the timestamped folder name under outputs/\n"
+            "  --llm-model M          Use model id M for API calls (overrides LSP_MODEL / OPENAI_MODEL)\n"
             "  --llm-rerun            Call the LLM and write llm_outputs.jsonl in the new run dir (default)\n"
             "  --llm-use-last         Reuse LLM rows from the newest outputs/*/llm_outputs.jsonl\n"
             "  --llm-from PATH        Reuse LLM rows from a specific jsonl file or run directory\n"
@@ -258,24 +264,33 @@ def _parse_pipeline_args(args: List[str]) -> PipelineCliOptions:
             raise SystemExit(2)
         output_name_suffix = args[idx + 1]
 
+    llm_model: Optional[str] = None
+    if "--llm-model" in args:
+        idx = args.index("--llm-model")
+        if idx + 1 >= len(args):
+            print("Error: --llm-model requires a value.", file=sys.stderr)
+            raise SystemExit(2)
+        llm_model = args[idx + 1]
+
     return PipelineCliOptions(
         verbose=verbose,
         plot=plot,
         output_name_suffix=output_name_suffix,
         llm_mode=llm_mode,
         llm_path=llm_path,
+        llm_model=llm_model,
     )
 
 
 if __name__ == "__main__":
     opts = _parse_pipeline_args(sys.argv[1:])
-    opts.output_name_suffix = "_new_LLM_claude-opus-4-6"
     result = run_pipeline(
         verbose=opts.verbose,
         plot=opts.plot,
         output_name_suffix=opts.output_name_suffix,
         llm_mode=opts.llm_mode,
         llm_path=opts.llm_path,
+        llm_model=opts.llm_model,
     )
     eval_metrics = cast(Dict[str, Any], cast(Dict[str, Any], result["eval_results"])["metrics"])
     print(

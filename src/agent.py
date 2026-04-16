@@ -89,14 +89,17 @@ def load_llm_outputs_jsonl(path: Path) -> Dict[str, Dict[str, object]]:
     return by_ticket
 
 
-def _get_llm_config() -> Dict[str, str]:
+def _get_llm_config(model: Optional[str] = None) -> Dict[str, str]:
     api_key = os.getenv("LSP_API_KEY") or os.getenv("API_KEY") or ""
     base_url = os.getenv("LSP_API_BASE") or os.getenv("BASE_URL") or DEFAULT_LLM_BASE_URL
-    model = os.getenv("LSP_MODEL") or os.getenv("OPENAI_MODEL") or DEFAULT_LLM_MODEL
+    if model is not None and str(model).strip():
+        resolved_model = str(model).strip()
+    else:
+        resolved_model = os.getenv("LSP_MODEL") or os.getenv("OPENAI_MODEL") or DEFAULT_LLM_MODEL
     return {
         "api_key": api_key,
         "base_url": base_url,
-        "model": model,
+        "model": resolved_model,
     }
 
 
@@ -200,9 +203,11 @@ def _classify_with_llm(
         ticket: Dict[str, str],
         context_examples: List[Dict[str, object]],
         save_dir: Optional[Path] = None,
+        *,
+        model: Optional[str] = None,
 ) -> Tuple[Optional[Dict[str, object]], Optional[str]]:
     ticket_id = str(ticket.get("ticket_id", "")).strip()
-    config = _get_llm_config()
+    config = _get_llm_config(model)
     model_name = config["model"]
 
     def _log(
@@ -430,6 +435,7 @@ def _classify_ticket(
         *,
         llm_output_dir: Optional[Path] = None,
         llm_cache: Optional[Dict[str, Dict[str, object]]] = None,
+        llm_model: Optional[str] = None,
 ) -> Dict[str, object]:
     context_examples = retrieve_context(ticket, kb_index)
     context_ids = [example.get("ticket_id", "") for example in context_examples]
@@ -454,7 +460,10 @@ def _classify_ticket(
         )
 
     llm_result, llm_error_flag = _classify_with_llm(
-        ticket, context_examples, save_dir=llm_output_dir,
+        ticket,
+        context_examples,
+        save_dir=llm_output_dir,
+        model=llm_model,
     )
     if llm_result is not None:
         llm_result["context_ticket_ids"] = context_ids
@@ -477,6 +486,7 @@ def classify_ticket(
         *,
         llm_output_dir: Optional[Path] = None,
         llm_cache: Optional[Dict[str, Dict[str, object]]] = None,
+        llm_model: Optional[str] = None,
 ) -> Dict[str, object]:
     start_time = time.time()
     result = _classify_ticket(
@@ -484,6 +494,7 @@ def classify_ticket(
         kb_index,
         llm_output_dir=llm_output_dir,
         llm_cache=llm_cache,
+        llm_model=llm_model,
     )
     end_time = time.time()
     time_taken = end_time - start_time
