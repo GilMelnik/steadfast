@@ -26,8 +26,6 @@ ALLOWED_CATEGORIES = {
 }
 ALLOWED_PRIORITIES = {"low", "medium", "high", "critical"}
 
-DEFAULT_LLM_BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
-# DEFAULT_LLM_MODEL = "claude-sonnet-4-6"
 DEFAULT_LLM_MODEL = "claude-opus-4-6"
 
 LLM_OUTPUTS_FILENAME = "llm_outputs.jsonl"
@@ -68,11 +66,11 @@ def load_llm_outputs_jsonl(path: Path) -> Dict[str, Dict[str, object]]:
 
 def _get_llm_config(model: Optional[str] = None) -> Dict[str, str]:
     api_key = os.getenv("LSP_API_KEY") or os.getenv("API_KEY") or ""
-    base_url = os.getenv("LSP_API_BASE") or os.getenv("BASE_URL") or DEFAULT_LLM_BASE_URL
+    base_url = os.getenv("LSP_API_BASE") or os.getenv("BASE_URL")
     if model is not None and str(model).strip():
         resolved_model = str(model).strip()
     else:
-        resolved_model = os.getenv("LSP_MODEL") or os.getenv("OPENAI_MODEL") or DEFAULT_LLM_MODEL
+        resolved_model = DEFAULT_LLM_MODEL
     return {
         "api_key": api_key,
         "base_url": base_url,

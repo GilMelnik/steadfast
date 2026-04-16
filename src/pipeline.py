@@ -218,7 +218,7 @@ def _parse_pipeline_args(args: List[str]) -> PipelineCliOptions:
             "  --verbose              Print per-ticket progress and metrics\n"
             "  --plot                 Write visualization PNGs\n"
             "  --output-name-suffix S Append S to the timestamped folder name under outputs/\n"
-            "  --llm-model M          Use model id M for API calls (overrides LSP_MODEL / OPENAI_MODEL)\n"
+            "  --llm-model M          Use model id M for API calls\n"
             "  --llm-rerun            Call the LLM and write llm_outputs.jsonl in the new run dir (default)\n"
             "  --llm-use-last         Reuse LLM rows from the newest outputs/*/llm_outputs.jsonl\n"
             "  --llm-from PATH        Reuse LLM rows from a specific jsonl file or run directory\n"

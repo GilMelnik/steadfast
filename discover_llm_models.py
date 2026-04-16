@@ -8,7 +8,7 @@ from openai import OpenAI
 
 # Fixed settings (no CLI)
 API_KEY = os.getenv("API_KEY")
-BASE_URL = "https://lsp-proxy.cave.latent.build/v1"
+BASE_URL = os.getenv("BASE_URL")
 MODELS_URL = "https://models.dev/api.json"
 MODELS_LIST_FILE = "models.list"
 # Catalog has thousands of entries; increase to probe more.
